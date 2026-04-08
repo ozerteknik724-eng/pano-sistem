@@ -1,116 +1,153 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VX Web Pano</title>
+<title>VX14 PRO Pano</title>
 
 <style>
 body{font-family:Arial;background:#f3f6fb;padding:10px}
-.card{background:#fff;padding:12px;margin:10px;border-radius:10px}
-button{padding:10px;border:none;border-radius:6px;background:#2563eb;color:#fff;margin:4px}
-input,select{padding:8px;margin:4px}
-.box{display:inline-block;padding:10px;margin:5px;background:#dbeafe;border-radius:8px}
+.card{background:#fff;padding:12px;margin-bottom:10px;border-radius:10px}
+button{padding:8px;border:none;border-radius:6px;background:#2563eb;color:#fff;margin:2px}
+select,input{padding:6px;margin:3px}
+.box{display:inline-block;padding:8px;margin:4px;border-radius:6px;background:#dbeafe}
+.del{background:#ef4444}
 </style>
-</head>
 
+</head>
 <body>
 
 <div class="card">
 <b>ŞEMA GİRİŞ</b><br>
 
-<select id="urun">
-<option value="RCCB">RCCB 4x40</option>
-<option value="MCB">MCB</option>
-<option value="KON">Kontaktör</option>
-<option value="MTK">Motor Koruma</option>
+<select id="group" onchange="setProducts()">
+<option value="koruma">Koruma</option>
+<option value="kumanda">Kumanda</option>
+<option value="motor">Motor</option>
 </select>
 
-<input id="yer" placeholder="ÇIKIŞ-1">
-<input id="adet" type="number" value="1">
+<select id="product"></select>
 
-<button onclick="ekle()">EKLE</button>
+<input id="addr" placeholder="ÇIKIŞ-1">
+<input id="qty" type="number" value="1">
+
+<button onclick="add()">EKLE</button>
 <button onclick="demo()">DEMO</button>
+
 </div>
 
-<div class="card">
-<b>ŞEMA</b>
-<div id="sema"></div>
-</div>
-
-<div class="card">
-<b>PANO</b>
-<div id="panel"></div>
-</div>
-
-<div class="card">
-<b>MALZEME</b>
-<div id="liste"></div>
-</div>
+<div class="card"><b>ŞEMA</b><div id="schema"></div></div>
+<div class="card"><b>PANO</b><div id="panel"></div></div>
+<div class="card"><b>MALZEME</b><div id="list"></div></div>
 
 <script>
 
-let veri=[];
+let data=[];
 
-const genislikler={
-"RCCB":7.2,
-"MCB":1.8,
-"KON":5.5,
-"MTK":3.5
+const products={
+koruma:["RCCB","MCB"],
+kumanda:["Kontaktör"],
+motor:["Termik"]
 };
 
-function ekle(){
-let P=document.getElementById("urun").value;
-let A=document.getElementById("yer").value;
-let Q=parseInt(document.getElementById("adet").value);
+const widths={
+"RCCB":7.2,
+"MCB":1.8,
+"Kontaktör":5.5,
+"Termik":3.5
+};
 
-veri.push({P,A,Q});
+function setProducts(){
+let g=document.getElementById("group").value;
+let p=document.getElementById("product");
+p.innerHTML="";
+products[g].forEach(x=>{
+let o=document.createElement("option");
+o.value=x;
+o.text=x;
+p.appendChild(o);
+});
+}
+setProducts();
+
+function add(){
+let p=document.getElementById("product").value;
+let a=document.getElementById("addr").value;
+let q=parseInt(document.getElementById("qty").value);
+
+if(!a) return alert("Adres gir");
+
+data.push({p,a,q});
+render();
+}
+
+function del(i){
+data.splice(i,1);
+render();
+}
+
+function change(i,val){
+data[i].q+=val;
+if(data[i].q<1)data[i].q=1;
 render();
 }
 
 function demo(){
-veri=[
-{P:"RCCB",A:"GİRİŞ",Q:1},
-{P:"MCB",A:"ÇIKIŞ-1",Q:3},
-{P:"KON",A:"MOTOR",Q:1}
+data=[
+{p:"RCCB",a:"GİRİŞ",q:1},
+{p:"MCB",a:"ÇIKIŞ-1",q:3},
+{p:"Kontaktör",a:"MOTOR",q:1}
 ];
 render();
 }
 
 function render(){
 
-let semaHTML="";
-veri.forEach(d=>{
-semaHTML+=`<div>${d.P} - ${d.A} (${d.Q})</div>`;
+// ŞEMA
+let s="";
+data.forEach((d,i)=>{
+s+=`<div class="box">
+${d.p}<br>${d.a}<br>
+<button onclick="change(${i},1)">+</button>
+${d.q}
+<button onclick="change(${i},-1)">-</button>
+<button class="del" onclick="del(${i})">X</button>
+</div>`;
+
+if(i<data.length-1)s+="→";
 });
-document.getElementById("sema").innerHTML=semaHTML;
+document.getElementById("schema").innerHTML=s;
 
-let w=0,din=1,phtml="";
-veri.forEach(d=>{
-let toplam=genislikler[d.P]*d.Q;
+// PANO
+let w=0;
+let din=1;
+let phtml="";
 
-if(w+toplam>37){
+data.forEach(d=>{
+let total=widths[d.p]*d.q;
+
+if(w+total>37){
 din++;
 w=0;
 }
 
-phtml+=`<div class="box">DIN-${din}<br>${d.P}</div>`;
-w+=toplam;
+phtml+=`<div class="box">DIN-${din}<br>${d.p}</div>`;
+w+=total;
 });
+
 document.getElementById("panel").innerHTML=phtml;
 
+// MALZEME
 let m={};
-veri.forEach(d=>{
-m[d.P]=(m[d.P]||0)+d.Q;
+data.forEach(d=>{
+m[d.p]=(m[d.p]||0)+d.q;
 });
 
 let mhtml="";
 for(let k in m){
 mhtml+=k+" x "+m[k]+"<br>";
 }
-document.getElementById("liste").innerHTML=mhtml;
-
+document.getElementById("list").innerHTML=mhtml;
 }
 
 </script>
