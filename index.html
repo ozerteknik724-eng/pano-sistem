@@ -1,2 +1,126 @@
 <!DOCTYPE html>
-<html ...
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VX13 Web Pano</title>
+
+<style>
+body{font-family:Arial;background:#f3f6fb;padding:10px}
+.card{background:#fff;padding:12px;margin-bottom:10px;border-radius:10px}
+button{padding:10px;border:none;border-radius:6px;background:#2563eb;color:#fff;margin:4px}
+select,input{padding:8px;margin:4px}
+.box{display:inline-block;padding:10px;margin:5px;border-radius:8px;background:#dbeafe}
+</style>
+
+</head>
+<body>
+
+<div class="card">
+<b>ŞEMA GİRİŞ</b><br>
+
+<select id="product">
+<option value="RCCB">RCCB 4x40</option>
+<option value="MCB">MCB</option>
+<option value="KON">Kontaktör</option>
+<option value="MTK">Motor Koruma</option>
+</select>
+
+<input id="addr" placeholder="ÇIKIŞ-1">
+<input id="qty" type="number" value="1">
+
+<button onclick="add()">EKLE</button>
+<button onclick="demo()">DEMO</button>
+
+</div>
+
+<div class="card">
+<b>ŞEMA</b>
+<div id="schema"></div>
+</div>
+
+<div class="card">
+<b>PANO</b>
+<div id="panel"></div>
+</div>
+
+<div class="card">
+<b>MALZEME</b>
+<div id="list"></div>
+</div>
+
+<script>
+
+let data=[];
+
+const widths={
+"RCCB":7.2,
+"MCB":1.8,
+"KON":5.5,
+"MTK":3.5
+};
+
+function add(){
+let p=document.getElementById("product").value;
+let a=document.getElementById("addr").value;
+let q=parseInt(document.getElementById("qty").value);
+
+data.push({p,a,q});
+render();
+}
+
+function demo(){
+data=[
+{p:"RCCB",a:"GİRİŞ",q:1},
+{p:"MCB",a:"ÇIKIŞ-1",q:3},
+{p:"KON",a:"MOTOR",q:1}
+];
+render();
+}
+
+function render(){
+
+let s="";
+data.forEach((d,i)=>{
+s+=`<div class="box">${d.p}<br>${d.a} x${d.q}</div>`;
+if(i<data.length-1) s+="<div>↓</div>";
+});
+document.getElementById("schema").innerHTML=s;
+
+let w=0;
+let din=1;
+let phtml="";
+
+data.forEach(d=>{
+let total=widths[d.p]*d.q;
+
+if(w+total>37){
+din++;
+w=0;
+}
+
+phtml+=`<div class="box">DIN-${din}<br>${d.p}</div>`;
+w+=total;
+});
+
+document.getElementById("panel").innerHTML=phtml;
+
+let m={};
+data.forEach(d=>{
+m[d.p]=(m[d.p]||0)+d.q;
+});
+
+let mhtml="";
+for(let k in m){
+mhtml+=k+" x "+m[k]+"<br>";
+}
+
+document.getElementById("list").innerHTML=mhtml;
+}
+
+demo();
+
+</script>
+
+</body>
+</html>
