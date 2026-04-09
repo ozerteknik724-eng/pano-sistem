@@ -1,135 +1,197 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VX16 PRO Pano Sistemi</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VX17 PRO Pano Sistemi</title>
+  <style>
+    :root{
+      --bg:#f3f6fb;
+      --card:#ffffff;
+      --border:#d8e0ea;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --blue:#2563eb;
+      --blue-soft:#dbeafe;
+      --red:#dc2626;
+      --gray:#6b7280;
+      --green:#16a34a;
+      --amber:#d97706;
+      --din:#eef6ff;
+      --taban:#fef3c7;
+      --yardimci:#f3f4f6;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      padding:14px;
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      display:grid;
+      grid-template-columns:1.15fr 0.85fr;
+      gap:14px;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+    .title{
+      font-size:20px;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:-4px;
+      margin-bottom:10px;
+    }
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:end;
+    }
+    .field{
+      min-width:150px;
+      flex:1;
+    }
+    .field.small{
+      max-width:120px;
+      flex:0 0 120px;
+    }
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    select,input{
+      width:100%;
+      padding:10px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:#fff;
+      font-size:14px;
+    }
+    button{
+      border:none;
+      border-radius:8px;
+      padding:10px 14px;
+      font-size:14px;
+      cursor:pointer;
+      background:var(--blue);
+      color:#fff;
+    }
+    button.gray{background:var(--gray)}
+    button.red{background:var(--red)}
+    button.green{background:var(--green)}
+    button.small{
+      padding:6px 10px;
+      font-size:12px;
+      margin-right:4px;
+    }
 
-<style>
-body {font-family: Arial; background:#f3f6fb; padding:10px}
-.card {background:#fff; padding:12px; margin-bottom:10px; border-radius:10px}
-select,input {padding:6px; margin:3px}
-button {padding:6px 10px; border:none; border-radius:6px; background:#2563eb; color:#fff}
-.del {background:red}
-.item {background:#eef; padding:6px; margin:3px; border-radius:6px}
-</style>
-</head>
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    th,td{
+      border-bottom:1px solid #eef2f7;
+      text-align:left;
+      padding:8px 6px;
+      vertical-align:top;
+    }
+    th{
+      font-size:12px;
+      color:var(--muted);
+    }
 
-<body>
+    .schema-flow{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+    }
+    .schema-box{
+      min-width:126px;
+      background:var(--blue-soft);
+      border:1px solid #bfd7ff;
+      border-radius:10px;
+      padding:10px;
+      font-size:13px;
+      text-align:center;
+      line-height:1.35;
+    }
+    .arrow{
+      font-size:18px;
+      color:var(--muted);
+    }
 
-<div class="card">
-<b>ŞEMA GİRİŞ</b><br>
-
-<select id="grup" onchange="urunGetir()">
-<option value="">Grup Seç</option>
-<option>Koruma</option>
-<option>Şalter</option>
-<option>Motor</option>
-</select>
-
-<select id="urun">
-<option>Ürün Seç</option>
-</select>
-
-<input id="cikis" placeholder="ÇIKIŞ">
-<input id="adet" type="number" value="1">
-
-<button onclick="ekle()">EKLE</button>
-</div>
-
-<div class="card">
-<b>ŞEMA</b>
-<div id="sema"></div>
-</div>
-
-<div class="card">
-<b>PANO</b>
-<div id="pano"></div>
-</div>
-
-<div class="card">
-<b>MALZEME</b>
-<div id="malzeme"></div>
-</div>
-
-<script>
-
-let liste = []
-
-let veri = {
-"Koruma":["RCCB","MCB"],
-"Şalter":["TMŞ","ATS"],
-"Motor":["Kontaktör","Termik"]
-}
-
-function urunGetir(){
-let grup = document.getElementById("grup").value
-let urun = document.getElementById("urun")
-
-urun.innerHTML=""
-
-veri[grup]?.forEach(u=>{
-let o = document.createElement("option")
-o.text=u
-urun.add(o)
-})
-}
-
-function ekle(){
-let grup = document.getElementById("grup").value
-let urun = document.getElementById("urun").value
-let cikis = document.getElementById("cikis").value
-let adet = document.getElementById("adet").value
-
-if(!urun) return alert("Ürün seç")
-
-liste.push({urun,cikis,adet})
-
-guncelle()
-}
-
-function sil(i){
-liste.splice(i,1)
-guncelle()
-}
-
-function guncelle(){
-
-// ŞEMA
-let s=""
-liste.forEach((x,i)=>{
-s += `<div class="item">${x.urun} - ${x.cikis} (${x.adet}) 
-<button class="del" onclick="sil(${i})">X</button></div>`
-})
-document.getElementById("sema").innerHTML=s
-
-// PANO
-let p=""
-let din=1
-liste.forEach(x=>{
-p+=`<div class="item">DIN-${din} ${x.urun}</div>`
-if(Math.random()>0.5) din++
-})
-document.getElementById("pano").innerHTML=p
-
-// MALZEME
-let m={}
-liste.forEach(x=>{
-m[x.urun]=(m[x.urun]||0)+parseInt(x.adet)
-})
-
-let ms=""
-for(let k in m){
-ms+=`${k} x ${m[k]}<br>`
-}
-document.getElementById("malzeme").innerHTML=ms
-
-// input reset
-document.getElementById("cikis").value=""
-document.getElementById("adet").value=1
-}
-
-</script>
-
-</body>
-</html>
+    .area-card{
+      border-radius:10px;
+      padding:10px;
+      margin-bottom:12px;
+      border:1px solid;
+    }
+    .area-din{
+      background:var(--din);
+      border-color:#cfe2ff;
+    }
+    .area-taban{
+      background:var(--taban);
+      border-color:#f7d787;
+    }
+    .area-yardimci{
+      background:var(--yardimci);
+      border-color:#d6d9de;
+    }
+    .area-head{
+      font-weight:700;
+      margin-bottom:8px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .din-body, .taban-body, .yardimci-body{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      min-height:52px;
+    }
+    .mod{
+      background:#fff;
+      border:1px solid #cfd8e3;
+      border-radius:8px;
+      min-width:88px;
+      padding:8px 6px;
+      text-align:center;
+      font-size:12px;
+      line-height:1.25;
+    }
+    .mod small{
+      display:block;
+      color:var(--muted);
+      margin-top:2px;
+      font-size:11px;
+    }
+    .summary-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+    }
+    .summary-box{
+      background:#f8fafc;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px;
+    }
+    .summary
