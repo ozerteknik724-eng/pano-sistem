@@ -194,4 +194,519 @@
       border-radius:10px;
       padding:10px;
     }
-    .summary
+    .summary-box b{
+      display:block;
+      font-size:18px;
+      margin-top:4px;
+    }
+    .ok{color:#166534}
+    .warn{color:#92400e}
+    .empty{
+      color:var(--muted);
+      font-size:13px;
+      padding:8px 0;
+    }
+    .pill{
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:11px;
+      margin-top:4px;
+      border:1px solid #d1d5db;
+      background:#fff;
+    }
+    @media (max-width:980px){
+      .wrap{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <div>
+    <div class="card">
+      <div class="title">VX17 PRO — Rol + Montaj Akıllı Yerleşim</div>
+      <div class="sub">Önce grup seç, sonra ürün seç. İstersen rol ve montaj belirt, istemezsen sistem normal çalışır.</div>
+
+      <div class="row">
+        <div class="field">
+          <label>Grup</label>
+          <select id="group"></select>
+        </div>
+
+        <div class="field">
+          <label>Ürün</label>
+          <select id="product"></select>
+        </div>
+
+        <div class="field">
+          <label>Rol</label>
+          <select id="role">
+            <option value="">Belirtme</option>
+            <option value="ANA GIRIS">Ana Giriş</option>
+            <option value="CIKIS">Çıkış</option>
+            <option value="YARDIMCI">Yardımcı</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Montaj</label>
+          <select id="mount">
+            <option value="DIN">DIN</option>
+            <option value="TABAN">TABAN</option>
+            <option value="SERBEST">SERBEST</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Adres / Çıkış</label>
+          <input id="addr" value="ÇIKIŞ-1" />
+        </div>
+
+        <div class="field small">
+          <label>Adet</label>
+          <input id="qty" type="number" min="1" value="1" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button onclick="saveRow()">Satır Ekle / Güncelle</button>
+        <button class="green" onclick="loadDemo()">PS001 Demo</button>
+        <button class="gray" onclick="clearAll()">Temizle</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title">Eklenen Satırlar</div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Grup</th>
+            <th>Ürün</th>
+            <th>Rol</th>
+            <th>Montaj</th>
+            <th>Adres</th>
+            <th>Adet</th>
+            <th>W</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody id="rowsTable"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="title">Şema Özeti</div>
+      <div id="schemaArea" class="schema-flow"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="title">Pano Özeti</div>
+      <div class="summary-grid">
+        <div class="summary-box">
+          Toplam Satır
+          <b id="sumRows">0</b>
+        </div>
+        <div class="summary-box">
+          Toplam Modül
+          <b id="sumModules">0</b>
+        </div>
+        <div class="summary-box">
+          Kullanılan DIN
+          <b id="sumDin">0</b>
+        </div>
+        <div class="summary-box">
+          Taban Eleman
+          <b id="sumTaban">0</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title">Pano Yerleşimi</div>
+      <div class="sub">DIN ve TABAN artık ayrı alanlarda gösterilir. SERBEST de ayrı kutuda tutulur.</div>
+      <div id="panelArea"></div>
+    </div>
+
+    <div class="card">
+      <div class="title">Malzeme Listesi</div>
+      <div id="bomArea"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const catalog = {
+  "RCCB": [
+    { code:"RCCB4-40", label:"RCCB 4x40", w:7.2, defaultMount:"DIN" },
+    { code:"RCCB4-63", label:"RCCB 4x63", w:7.2, defaultMount:"DIN" },
+    { code:"RCCB2-40", label:"RCCB 2x40", w:3.6, defaultMount:"DIN" }
+  ],
+  "MCB": [
+    { code:"MCB1-16", label:"MCB 1x16", w:1.8, defaultMount:"DIN" },
+    { code:"MCB1-20", label:"MCB 1x20", w:1.8, defaultMount:"DIN" },
+    { code:"MCB3-32", label:"MCB 3x32", w:5.4, defaultMount:"DIN" }
+  ],
+  "KONTAKTÖR": [
+    { code:"KON25", label:"Kontaktör 25A", w:5.5, defaultMount:"TABAN" },
+    { code:"KON32", label:"Kontaktör 32A", w:5.5, defaultMount:"TABAN" }
+  ],
+  "MOTOR KORUMA": [
+    { code:"MTK6-10", label:"Motor Koruma 6-10A", w:3.5, defaultMount:"DIN" },
+    { code:"MTK9-14", label:"Motor Koruma 9-14A", w:3.5, defaultMount:"DIN" }
+  ],
+  "TMŞ": [
+    { code:"TMS125", label:"TMŞ 3x125", w:14.0, defaultMount:"TABAN" },
+    { code:"TMS250", label:"TMŞ 3x250", w:14.0, defaultMount:"TABAN" }
+  ],
+  "BARA": [
+    { code:"BARA4-80", label:"4x80 Bara", w:16.0, defaultMount:"TABAN" },
+    { code:"BARA4-125", label:"4x125 Bara", w:18.0, defaultMount:"TABAN" }
+  ]
+};
+
+let rows = [];
+let editIndex = -1;
+
+const groupSel = document.getElementById("group");
+const productSel = document.getElementById("product");
+const mountSel = document.getElementById("mount");
+
+function initGroups(){
+  groupSel.innerHTML = "";
+  Object.keys(catalog).forEach(g => {
+    const opt = document.createElement("option");
+    opt.value = g;
+    opt.textContent = g;
+    groupSel.appendChild(opt);
+  });
+  fillProducts();
+}
+
+function fillProducts(){
+  const g = groupSel.value;
+  productSel.innerHTML = "";
+  catalog[g].forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.code;
+    opt.textContent = p.label;
+    productSel.appendChild(opt);
+  });
+  setDefaultMount();
+}
+
+function setDefaultMount(){
+  const prod = getSelectedProduct();
+  if(prod){
+    mountSel.value = prod.defaultMount || "DIN";
+  }
+}
+
+groupSel.addEventListener("change", fillProducts);
+productSel.addEventListener("change", setDefaultMount);
+
+function getSelectedProduct(){
+  const g = groupSel.value;
+  const code = productSel.value;
+  return catalog[g].find(x => x.code === code);
+}
+
+function saveRow(){
+  const group = groupSel.value;
+  const prod = getSelectedProduct();
+  const role = document.getElementById("role").value;
+  const mount = document.getElementById("mount").value;
+  const addr = document.getElementById("addr").value.trim();
+  const qty = Number(document.getElementById("qty").value || 1);
+
+  if(!prod || qty < 1){
+    alert("Ürün ve adet kontrol et.");
+    return;
+  }
+
+  const row = {
+    group,
+    code: prod.code,
+    label: prod.label,
+    role,
+    mount,
+    addr,
+    qty,
+    w: prod.w
+  };
+
+  if(editIndex >= 0){
+    rows[editIndex] = row;
+    editIndex = -1;
+  } else {
+    rows.push(row);
+  }
+
+  document.getElementById("qty").value = 1;
+  render();
+}
+
+function editRow(i){
+  const r = rows[i];
+  groupSel.value = r.group;
+  fillProducts();
+  productSel.value = r.code;
+  document.getElementById("role").value = r.role || "";
+  document.getElementById("mount").value = r.mount || "DIN";
+  document.getElementById("addr").value = r.addr;
+  document.getElementById("qty").value = r.qty;
+  editIndex = i;
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function deleteRow(i){
+  rows.splice(i, 1);
+  if(editIndex === i) editIndex = -1;
+  render();
+}
+
+function clearAll(){
+  rows = [];
+  editIndex = -1;
+  render();
+}
+
+function loadDemo(){
+  rows = [
+    {group:"TMŞ", code:"TMS125", label:"TMŞ 3x125", role:"ANA GIRIS", mount:"TABAN", addr:"GİRİŞ", qty:1, w:14.0},
+    {group:"RCCB", code:"RCCB4-40", label:"RCCB 4x40", role:"CIKIS", mount:"DIN", addr:"ÇIKIŞ-1", qty:1, w:7.2},
+    {group:"MCB", code:"MCB3-32", label:"MCB 3x32", role:"CIKIS", mount:"DIN", addr:"ÇIKIŞ-1", qty:3, w:5.4},
+    {group:"KONTAKTÖR", code:"KON25", label:"Kontaktör 25A", role:"CIKIS", mount:"TABAN", addr:"MOTOR-1", qty:1, w:5.5},
+    {group:"BARA", code:"BARA4-80", label:"4x80 Bara", role:"YARDIMCI", mount:"TABAN", addr:"DAĞITIM", qty:1, w:16.0}
+  ];
+  editIndex = -1;
+  render();
+}
+
+function renderRowsTable(){
+  const tbody = document.getElementById("rowsTable");
+  if(rows.length === 0){
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">Henüz satır yok.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map((r, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${r.group}</td>
+      <td>${r.label}</td>
+      <td>${r.role || "-"}</td>
+      <td>${r.mount}</td>
+      <td>${r.addr || "-"}</td>
+      <td>${r.qty}</td>
+      <td>${(r.w * r.qty).toFixed(1)} cm</td>
+      <td>
+        <button class="small" onclick="editRow(${i})">Düzenle</button>
+        <button class="small red" onclick="deleteRow(${i})">Sil</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function renderSchema(){
+  const area = document.getElementById("schemaArea");
+  if(rows.length === 0){
+    area.innerHTML = '<div class="empty">Henüz veri yok.</div>';
+    return;
+  }
+
+  let html = "";
+  rows.forEach((r, i) => {
+    const pillRole = r.role ? `<span class="pill">${r.role}</span>` : "";
+    const pillMount = `<span class="pill">${r.mount}</span>`;
+    html += `
+      <div class="schema-box">
+        <b>${r.code}</b><br>
+        ${r.addr || "-"}<br>
+        Adet: ${r.qty}<br>
+        ${pillRole}${pillMount}
+      </div>
+    `;
+    if(i < rows.length - 1){
+      html += `<div class="arrow">→</div>`;
+    }
+  });
+  area.innerHTML = html;
+}
+
+function buildExpandedByMount(){
+  const dinModules = [];
+  const tabanModules = [];
+  const serbestModules = [];
+
+  rows.forEach(r => {
+    for(let i=0; i<r.qty; i++){
+      const item = {
+        code:r.code,
+        label:r.label,
+        addr:r.addr,
+        role:r.role,
+        mount:r.mount,
+        w:r.w
+      };
+
+      if(r.mount === "DIN"){
+        dinModules.push(item);
+      } else if(r.mount === "TABAN"){
+        tabanModules.push(item);
+      } else {
+        serbestModules.push(item);
+      }
+    }
+  });
+
+  return { dinModules, tabanModules, serbestModules };
+}
+
+function renderPanel(){
+  const area = document.getElementById("panelArea");
+  const { dinModules, tabanModules, serbestModules } = buildExpandedByMount();
+
+  document.getElementById("sumRows").textContent = rows.length;
+  document.getElementById("sumModules").textContent = dinModules.length + tabanModules.length + serbestModules.length;
+  document.getElementById("sumTaban").textContent = tabanModules.length;
+
+  const DIN_LIMIT = 37;
+  const dins = [];
+  let current = [];
+  let currentW = 0;
+
+  dinModules.forEach(m => {
+    if(currentW + m.w > DIN_LIMIT){
+      dins.push({items:[...current], width:currentW});
+      current = [];
+      currentW = 0;
+    }
+    current.push(m);
+    currentW += m.w;
+  });
+
+  if(current.length){
+    dins.push({items:[...current], width:currentW});
+  }
+
+  document.getElementById("sumDin").textContent = dins.length;
+
+  let html = "";
+
+  html += `
+    <div class="area-card area-din">
+      <div class="area-head">
+        <span>DIN Alanı</span>
+        <span>${dins.length} hat</span>
+      </div>
+      ${
+        dins.length === 0
+        ? '<div class="empty">DIN elemanı yok.</div>'
+        : dins.map((din, idx) => {
+            const durum = din.width > 33 ? '<span class="warn">Sınırda</span>' : '<span class="ok">Uygun</span>';
+            return `
+              <div class="area-card area-din" style="margin:8px 0 0 0;background:#fff">
+                <div class="area-head">
+                  <span>DIN-${idx+1}</span>
+                  <span>${din.width.toFixed(1)} / 37 cm - ${durum}</span>
+                </div>
+                <div class="din-body">
+                  ${din.items.map(m => `
+                    <div class="mod">
+                      <b>${m.code}</b>
+                      <small>${m.addr || "-"}</small>
+                      <small>${m.w.toFixed(1)} cm</small>
+                    </div>
+                  `).join("")}
+                </div>
+              </div>
+            `;
+          }).join("")
+      }
+    </div>
+  `;
+
+  html += `
+    <div class="area-card area-taban">
+      <div class="area-head">
+        <span>TABAN Alanı</span>
+        <span>${tabanModules.length} eleman</span>
+      </div>
+      <div class="taban-body">
+        ${
+          tabanModules.length === 0
+          ? '<div class="empty">Taban elemanı yok.</div>'
+          : tabanModules.map(m => `
+            <div class="mod">
+              <b>${m.code}</b>
+              <small>${m.addr || "-"}</small>
+              <small>${m.w.toFixed(1)} cm</small>
+            </div>
+          `).join("")
+        }
+      </div>
+    </div>
+  `;
+
+  html += `
+    <div class="area-card area-yardimci">
+      <div class="area-head">
+        <span>SERBEST / DİĞER</span>
+        <span>${serbestModules.length} eleman</span>
+      </div>
+      <div class="yardimci-body">
+        ${
+          serbestModules.length === 0
+          ? '<div class="empty">Serbest eleman yok.</div>'
+          : serbestModules.map(m => `
+            <div class="mod">
+              <b>${m.code}</b>
+              <small>${m.addr || "-"}</small>
+              <small>${m.w.toFixed(1)} cm</small>
+            </div>
+          `).join("")
+        }
+      </div>
+    </div>
+  `;
+
+  area.innerHTML = html;
+}
+
+function renderBom(){
+  const area = document.getElementById("bomArea");
+  if(rows.length === 0){
+    area.innerHTML = '<div class="empty">Henüz veri yok.</div>';
+    return;
+  }
+
+  const bom = {};
+  rows.forEach(r => {
+    bom[r.code] = (bom[r.code] || 0) + r.qty;
+  });
+
+  let html = '<table><thead><tr><th>Ürün</th><th>Toplam Adet</th></tr></thead><tbody>';
+  Object.keys(bom).forEach(k => {
+    html += `<tr><td>${k}</td><td>${bom[k]}</td></tr>`;
+  });
+  html += '</tbody></table>';
+
+  area.innerHTML = html;
+}
+
+function render(){
+  renderRowsTable();
+  renderSchema();
+  renderPanel();
+  renderBom();
+}
+
+initGroups();
+loadDemo();
+</script>
+</body>
+</html>
