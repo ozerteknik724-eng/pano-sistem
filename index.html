@@ -3,168 +3,131 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VX18 PRO Pano Sistemi</title>
+<title>VX19 Pano Sistemi</title>
 
 <style>
 body {font-family: Arial; background:#f3f6fb; padding:10px}
 
 .card {background:#fff; padding:12px; margin-bottom:10px; border-radius:10px}
 
-select,input {padding:6px; margin:3px}
-
 button {padding:6px 10px; background:#2563eb; color:#fff; border:none; border-radius:6px}
 
-.group-box {border:2px solid #ddd; border-radius:10px; padding:10px; margin:5px}
+input, select {padding:6px; margin:3px}
 
-.giris {background:#e0f2fe}
-.cikis {background:#dcfce7}
-.taban {background:#fef3c7}
-
-.item {background:#eef; padding:5px; margin:3px; border-radius:6px}
-
-.wrap {display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:8px}
-
-.kumanda {background:#f5f3ff}
-
-.small {font-size:12px;color:#555}
+.item {background:#eef; padding:6px; margin:3px; border-radius:6px; display:inline-block}
 </style>
-
 </head>
+
 <body>
 
 <div class="card">
-<b>VX18 PRO — Akıllı Pano</b><br><br>
-
-Grup:
-<select id="grup">
-<option>TMŞ</option>
-<option>RCCB</option>
-<option>MCB</option>
-<option>KONTAKTÖR</option>
-<option>MOTOR KORUMA</option>
-<option>BARA</option>
-<option>BUTON</option>
-<option>LAMBA</option>
-<option>PAKO</option>
-</select>
+<b>Ürün Ekle</b><br>
 
 Ürün:
-<input id="urun" placeholder="Örn: Kontaktör 25A">
-
-Rol:
-<select id="rol">
-<option>ANA GİRİŞ</option>
-<option>DAĞITIM</option>
-<option>ÇIKIŞ</option>
-<option>KUMANDA</option>
+<select id="urun">
+  <option value="RCCB">RCCB</option>
+  <option value="MCB">MCB</option>
+  <option value="KONTAKTÖR">KONTAKTÖR</option>
 </select>
 
 Montaj:
 <select id="montaj">
-<option>DIN</option>
-<option>TABAN</option>
-<option>KUMANDA</option>
+  <option value="DIN">DIN</option>
+  <option value="TABAN">TABAN</option>
 </select>
 
-Adres:
-<input id="adres" placeholder="ÇIKIŞ-1">
-
-Adet:
-<input id="adet" value="1" type="number">
-
-<br><br>
+Genişlik (cm):
+<input id="w" value="7">
 
 <button onclick="ekle()">EKLE</button>
-<button onclick="temizle()">TEMİZLE</button>
 </div>
 
 <div class="card">
-<b>ŞEMA</b>
+<b>Eklenenler</b>
 <div id="liste"></div>
 </div>
 
 <div class="card">
-<b>PANO YERLEŞİMİ</b>
+<b>DIN Hesap</b><br><br>
 
-<div id="pano"></div>
+Ray Genişliği:
+<input id="dinGenislik" value="37">
 
-</div>
+<button onclick="dinHesapla()">HESAPLA</button>
 
-<div class="card kumanda">
-<b>KUMANDA ALANI</b>
-<div id="kumanda"></div>
+<div id="dinSonuc"></div>
 </div>
 
 <script>
 
-let data=[]
-
-function kontakTipi(grup){
-if(grup=="BUTON") return "NO/NC"
-if(grup=="KONTAKTÖR") return "13-14"
-if(grup=="MOTOR KORUMA") return "13-14 / 21-22"
-return "-"
-}
+let satirlar = [];
 
 function ekle(){
-let g=grup.value
-let u=urun.value
-let r=rol.value
-let m=montaj.value
-let a=adres.value
-let adet=parseInt(adet.value)
+  let urun = document.getElementById("urun").value;
+  let montaj = document.getElementById("montaj").value;
+  let w = parseFloat(document.getElementById("w").value);
 
-for(let i=0;i<adet;i++){
-data.push({g,u,r,m,a})
+  satirlar.push({urun, montaj, w});
+
+  goster();
 }
 
-render()
+function goster(){
+  let html = "";
+
+  satirlar.forEach(x=>{
+    html += `<div class="item">${x.urun} - ${x.montaj} (${x.w} cm)</div>`;
+  });
+
+  document.getElementById("liste").innerHTML = html;
 }
 
-function temizle(){
-data=[]
-render()
-}
+function dinHesapla(){
 
-function render(){
+  let maxGenislik = parseFloat(document.getElementById("dinGenislik").value) || 37;
 
-// liste
-liste.innerHTML=data.map((x,i)=>
-`${i+1}. ${x.g} - ${x.u} (${x.a}) [${kontakTipi(x.g)}]`
-).join("<br>")
+  let dinler = [];
+  let aktifDin = [];
+  let toplam = 0;
 
-// gruplama
-let grupObj={}
+  satirlar.forEach(item => {
 
-data.forEach(x=>{
-let key=x.a || x.r
-if(!grupObj[key]) grupObj[key]=[]
-grupObj[key].push(x)
-})
+    if(item.montaj !== "DIN") return;
 
-// pano
-pano.innerHTML='<div class="wrap">'+
-Object.keys(grupObj).map(k=>{
+    if(toplam + item.w > maxGenislik){
+      dinler.push({liste:[...aktifDin], toplam});
+      aktifDin = [];
+      toplam = 0;
+    }
 
-let cls="group-box"
-if(k.includes("GİRİŞ")) cls+=" giris"
-else if(k.includes("ÇIKIŞ")) cls+=" cikis"
-else cls+=" taban"
+    aktifDin.push(item);
+    toplam += item.w;
 
-return `<div class="${cls}">
-<b>${k}</b><br>
-${grupObj[k].map(x=>
-`<div class="item">${x.g}<br><span class="small">${kontakTipi(x.g)}</span></div>`
-).join("")}
-</div>`
+  });
 
-}).join("")+'</div>'
+  if(aktifDin.length > 0){
+    dinler.push({liste:[...aktifDin], toplam});
+  }
 
-// kumanda
-kumanda.innerHTML=data
-.filter(x=>x.m=="KUMANDA")
-.map(x=>`<div class="item">${x.g} (${kontakTipi(x.g)})</div>`)
-.join("")
+  let html = "";
+
+  dinler.forEach((din, i)=>{
+    let durum = din.toplam <= maxGenislik ? "UYGUN" : "TAŞTI";
+
+    html += `
+    <div style="margin-top:10px;padding:10px;border:1px solid #ccc;border-radius:8px">
+      <b>DIN-${i+1}</b> → ${din.toplam} / ${maxGenislik} cm → 
+      <span style="color:${durum==="UYGUN"?"green":"red"}">${durum}</span><br>
+    `;
+
+    din.liste.forEach(x=>{
+      html += `<span class="item">${x.urun}</span>`;
+    });
+
+    html += "</div>";
+  });
+
+  document.getElementById("dinSonuc").innerHTML = html;
 }
 
 </script>
