@@ -1,127 +1,977 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>VX23 Pano Motoru</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VX24 MASTER - Yarı Teknik Şema</title>
+  <style>
+    :root{
+      --bg:#f3f6fb;
+      --card:#ffffff;
+      --border:#d8e0ea;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --blue:#2563eb;
+      --red:#dc2626;
+      --green:#16a34a;
+      --amber:#d97706;
+      --din:#eef6ff;
+      --taban:#fef3c7;
+      --kumanda:#ede9fe;
+      --giris:#e0f2fe;
+      --dagitim:#fce7f3;
+      --cikis:#dcfce7;
+      --flow:#eff6ff;
+    }
 
-<style>
-body{font-family:Arial;background:#f3f6fb;padding:10px}
-.card{background:#fff;padding:12px;margin-bottom:10px;border-radius:10px}
-.wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}
-.group{border:2px solid #ccc;border-radius:10px;padding:10px}
-.item{padding:6px;margin:4px;border-radius:6px;background:#eef}
-.ok{font-size:18px;margin:2px}
-.kumanda{background:#f5f3ff}
-</style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      padding:14px;
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
 
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:14px;
+      margin-bottom:12px;
+    }
+
+    .title{
+      font-size:22px;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:end;
+    }
+
+    .field{
+      min-width:140px;
+      flex:1;
+    }
+
+    .field.small{
+      max-width:120px;
+      flex:0 0 120px;
+    }
+
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+
+    input,select{
+      width:100%;
+      padding:10px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:#fff;
+      font-size:14px;
+    }
+
+    button{
+      border:none;
+      border-radius:8px;
+      padding:10px 14px;
+      font-size:14px;
+      cursor:pointer;
+      background:var(--blue);
+      color:#fff;
+    }
+
+    button.gray{background:#6b7280}
+    button.red{background:var(--red)}
+    button.green{background:var(--green)}
+    button.small{
+      padding:6px 10px;
+      font-size:12px;
+      margin-right:4px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.1fr 0.9fr;
+      gap:14px;
+    }
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+    }
+
+    .summary-box{
+      background:#f8fafc;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px;
+    }
+
+    .summary-box b{
+      display:block;
+      font-size:20px;
+      margin-top:4px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+
+    th,td{
+      border-bottom:1px solid #eef2f7;
+      text-align:left;
+      padding:8px 6px;
+      vertical-align:top;
+    }
+
+    th{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .wrap{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+      gap:10px;
+    }
+
+    .group{
+      border:2px solid #ccc;
+      border-radius:12px;
+      padding:10px;
+      background:#fff;
+    }
+
+    .giris{background:var(--giris)}
+    .dagitim{background:var(--dagitim)}
+    .cikis{background:var(--cikis)}
+
+    .group-title{
+      font-weight:700;
+      margin-bottom:8px;
+      font-size:18px;
+    }
+
+    .section-title{
+      font-size:12px;
+      color:var(--muted);
+      margin:10px 0 4px 0;
+      font-weight:700;
+    }
+
+    .chip{
+      display:inline-block;
+      padding:7px 9px;
+      margin:4px;
+      border-radius:8px;
+      font-size:12px;
+      line-height:1.3;
+      border:1px solid #d1d5db;
+      background:#fff;
+      min-width:96px;
+      text-align:center;
+    }
+
+    .chip.din{background:var(--din)}
+    .chip.taban{background:var(--taban)}
+    .chip.kumanda{background:var(--kumanda)}
+
+    .pill{
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:11px;
+      margin:2px;
+      border:1px solid #d1d5db;
+      background:#fff;
+    }
+
+    .empty{
+      color:var(--muted);
+      font-size:13px;
+      padding:8px 0;
+    }
+
+    .ok{color:#166534}
+    .warn{color:#92400e}
+    .bad{color:#b91c1c}
+
+    .flow-card{
+      background:var(--flow);
+      border:1px solid #cfe0ff;
+      border-radius:12px;
+      padding:10px;
+      margin-bottom:10px;
+    }
+
+    .flow-title{
+      font-weight:700;
+      font-size:16px;
+      margin-bottom:6px;
+    }
+
+    .flow-line{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      align-items:center;
+      margin-bottom:8px;
+    }
+
+    .flow-node{
+      background:#fff;
+      border:1px solid #cbd5e1;
+      border-radius:8px;
+      padding:8px 10px;
+      min-width:110px;
+      text-align:center;
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    .flow-node.power{background:#eef6ff}
+    .flow-node.control{background:#f5f3ff}
+    .flow-arrow{
+      font-size:18px;
+      color:#64748b;
+    }
+
+    .flow-mini{
+      font-size:12px;
+      color:#475569;
+      margin-top:4px;
+    }
+
+    .schema-wrap{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+
+    .schema-box{
+      min-width:150px;
+      background:#dbeafe;
+      border:1px solid #bfd7ff;
+      border-radius:10px;
+      padding:10px;
+      text-align:center;
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    .schema-arrow{
+      color:#6b7280;
+      font-size:18px;
+    }
+
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
+  </style>
 </head>
 <body>
 
 <div class="card">
-<b>VX23 — AKIŞ MOTORU</b><br><br>
+  <div class="title">VX24 MASTER — Yarı Teknik Şema</div>
+  <div class="sub">VX22 üstü. Güç ve kumanda korunur, şimdi bağlantı mantığı da görünür. Geri dönüş yok.</div>
 
-Grup:
-<select id="g">
-<option>RCCB</option>
-<option>MCB</option>
-<option>KONTAKTÖR</option>
-<option>MOTOR KORUMA</option>
-<option>BUTON</option>
-<option>LAMBA</option>
-<option>PAKO</option>
-<option>RÖLE</option>
-</select>
+  <div class="row">
+    <div class="field">
+      <label>Grup</label>
+      <select id="group">
+        <option>TMŞ</option>
+        <option>RCCB</option>
+        <option>MCB</option>
+        <option>KONTAKTÖR</option>
+        <option>MOTOR KORUMA</option>
+        <option>BARA</option>
+        <option>BUTON</option>
+        <option>LAMBA</option>
+        <option>PAKO</option>
+        <option>GERİLİM RÖLESİ</option>
+        <option>ZAMAN RÖLESİ</option>
+        <option>ŞAMANDIRA</option>
+        <option>FG4 RÖLESİ</option>
+        <option>TRAFO</option>
+        <option>ISITICI</option>
+      </select>
+    </div>
 
-Ürün: <input id="u">
-Adres: <input id="a" placeholder="ÇIKIŞ-1">
+    <div class="field">
+      <label>Ürün</label>
+      <input id="product" placeholder="Örn: RCCB 4x40, Stop Buton, Kontaktör 25A">
+    </div>
 
-<button onclick="ekle()">EKLE</button>
-<button onclick="temizle()">TEMİZLE</button>
+    <div class="field">
+      <label>Rol</label>
+      <select id="role" onchange="toggleLinkedOutput()">
+        <option>ANA GİRİŞ</option>
+        <option>DAĞITIM</option>
+        <option>ÇIKIŞ</option>
+        <option>KUMANDA</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Montaj</label>
+      <select id="mount">
+        <option>DIN</option>
+        <option>TABAN</option>
+        <option>KUMANDA</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Adres / Çıkış</label>
+      <input id="addr" placeholder="GİRİŞ, DAĞITIM, ÇIKIŞ-1, ÇIKIŞ-2">
+    </div>
+
+    <div class="field">
+      <label>Bağlı Olduğu Çıkış</label>
+      <input id="linkedOutput" placeholder="KUMANDA ise: ÇIKIŞ-1">
+    </div>
+
+    <div class="field small">
+      <label>Adet</label>
+      <input id="qty" type="number" min="1" value="1">
+    </div>
+
+    <div class="field small">
+      <label>Genişlik (cm)</label>
+      <input id="width" type="number" step="0.1" min="0" value="7.0">
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:8px">
+    <button onclick="saveRow()">Satır Ekle / Güncelle</button>
+    <button class="green" onclick="loadDemo()">Demo Yükle</button>
+    <button class="gray" onclick="clearAll()">Temizle</button>
+  </div>
 </div>
 
-<div class="card">
-<b>PANO</b>
-<div id="pano"></div>
+<div class="grid">
+  <div>
+    <div class="card">
+      <div class="title" style="font-size:18px">Eklenen Satırlar</div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Grup</th>
+            <th>Ürün</th>
+            <th>Rol</th>
+            <th>Montaj</th>
+            <th>Adres</th>
+            <th>Bağlı Çıkış</th>
+            <th>Adet</th>
+            <th>W</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody id="rowsTable"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="title" style="font-size:18px">Şema Özeti</div>
+      <div id="schemaArea" class="schema-wrap"></div>
+    </div>
+
+    <div class="card">
+      <div class="title" style="font-size:18px">DIN Hesap</div>
+      <div class="row">
+        <div class="field small">
+          <label>Ray Genişliği (cm)</label>
+          <input id="dinLimit" type="number" step="0.1" value="37">
+        </div>
+        <div class="field small">
+          <button onclick="renderAll()" style="margin-top:20px">Hesapla / Yenile</button>
+        </div>
+      </div>
+      <div id="dinResult" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="title" style="font-size:18px">Pano Özeti</div>
+      <div class="summary-grid">
+        <div class="summary-box">Toplam Satır<b id="sumRows">0</b></div>
+        <div class="summary-box">Toplam Modül<b id="sumModules">0</b></div>
+        <div class="summary-box">DIN Satırı<b id="sumDinRows">0</b></div>
+        <div class="summary-box">Taban Eleman<b id="sumTaban">0</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title" style="font-size:18px">Pano Yerleşimi</div>
+      <div id="panelArea"></div>
+    </div>
+
+    <div class="card">
+      <div class="title" style="font-size:18px">Yarı Teknik Akış Şeması</div>
+      <div id="flowArea"></div>
+    </div>
+
+    <div class="card">
+      <div class="title" style="font-size:18px">Malzeme Listesi</div>
+      <div id="bomArea"></div>
+    </div>
+  </div>
 </div>
 
 <script>
+  let rows = [];
+  let editIndex = -1;
 
-let data=[]
+  function toggleLinkedOutput(){
+    const role = document.getElementById("role").value;
+    const linked = document.getElementById("linkedOutput");
+    linked.placeholder = role === "KUMANDA" ? "Örn: ÇIKIŞ-1" : "Gerekirse boş bırak";
+  }
 
-function ekle(){
-data.push({
-g:g.value,
-u:u.value,
-a:a.value
-})
-render()
-}
+  function kontakTipi(group, product){
+    const p = (product || "").toLowerCase();
 
-function temizle(){
-data=[]
-render()
-}
+    if(group === "BUTON"){
+      if(p.includes("stop")) return "NC 21-22";
+      if(p.includes("start")) return "NO 13-14";
+      return "NO / NC";
+    }
+    if(group === "KONTAKTÖR") return "A1-A2 / 13-14";
+    if(group === "MOTOR KORUMA") return "13-14 / 21-22";
+    if(group === "GERİLİM RÖLESİ") return "L1-L2-L3-N / 1-2";
+    if(group === "ZAMAN RÖLESİ") return "A1-A2 / 15-16-18";
+    if(group === "ŞAMANDIRA") return "NO / NC";
+    if(group === "FG4 RÖLESİ") return "11-12-14";
+    if(group === "PAKO") return "0-1 / 1-0-2";
+    if(group === "TRAFO") return "AC giriş / AC çıkış";
+    if(group === "ISITICI") return "AC / DC yardımcı";
+    return "-";
+  }
 
-function render(){
+  function powerOrder(item){
+    const g = item.group;
+    if(g === "RCCB") return 1;
+    if(g === "MCB") return 2;
+    if(g === "KONTAKTÖR") return 3;
+    if(g === "MOTOR KORUMA") return 4;
+    if(g === "TMŞ") return 5;
+    if(g === "BARA") return 6;
+    return 99;
+  }
 
-let cikislar={}
+  function controlOrder(item){
+    const p = (item.product || "").toLowerCase();
+    if(item.group === "GERİLİM RÖLESİ") return 1;
+    if(item.group === "FG4 RÖLESİ") return 2;
+    if(item.group === "ŞAMANDIRA") return 3;
+    if(item.group === "PAKO") return 4;
+    if(item.group === "ZAMAN RÖLESİ") return 5;
+    if(item.group === "BUTON" && p.includes("stop")) return 6;
+    if(item.group === "BUTON" && p.includes("start")) return 7;
+    if(item.group === "MOTOR KORUMA") return 8;
+    if(item.group === "KONTAKTÖR") return 9;
+    if(item.group === "LAMBA" && p.includes("hazır")) return 10;
+    if(item.group === "LAMBA" && p.includes("çalış")) return 11;
+    if(item.group === "LAMBA" && p.includes("arıza")) return 12;
+    if(item.group === "LAMBA") return 13;
+    if(item.group === "TRAFO") return 14;
+    if(item.group === "ISITICI") return 15;
+    return 99;
+  }
 
-data.forEach(x=>{
-if(!cikislar[x.a]) cikislar[x.a]=[]
-cikislar[x.a].push(x)
-})
+  function saveRow(){
+    const row = {
+      group: document.getElementById("group").value,
+      product: document.getElementById("product").value.trim(),
+      role: document.getElementById("role").value,
+      mount: document.getElementById("mount").value,
+      addr: document.getElementById("addr").value.trim(),
+      linkedOutput: document.getElementById("linkedOutput").value.trim(),
+      qty: Number(document.getElementById("qty").value || 1),
+      width: parseFloat(document.getElementById("width").value || 0)
+    };
 
-let html='<div class="wrap">'
+    if(!row.product){
+      alert("Ürün adı gir.");
+      return;
+    }
+    if(row.qty < 1){
+      alert("Adet 1 veya daha büyük olmalı.");
+      return;
+    }
+    if(row.width <= 0){
+      alert("Genişlik 0’dan büyük olmalı.");
+      return;
+    }
+    if(row.role === "KUMANDA" && !row.linkedOutput){
+      alert("Kumanda elemanı için 'Bağlı Olduğu Çıkış' gir.");
+      return;
+    }
 
-Object.keys(cikislar).forEach(c=>{
+    if(editIndex >= 0){
+      rows[editIndex] = row;
+      editIndex = -1;
+    } else {
+      rows.push(row);
+    }
 
-let grup=cikislar[c]
+    document.getElementById("product").value = "";
+    document.getElementById("qty").value = 1;
+    document.getElementById("width").value = 7.0;
+    document.getElementById("linkedOutput").value = "";
 
-// AYIR
-let guc=[]
-let kumanda=[]
+    renderAll();
+  }
 
-grup.forEach(x=>{
-if(["RCCB","MCB","KONTAKTÖR","MOTOR KORUMA"].includes(x.g))
-guc.push(x)
-else
-kumanda.push(x)
-})
+  function editRow(i){
+    const r = rows[i];
+    document.getElementById("group").value = r.group;
+    document.getElementById("product").value = r.product;
+    document.getElementById("role").value = r.role;
+    document.getElementById("mount").value = r.mount;
+    document.getElementById("addr").value = r.addr;
+    document.getElementById("linkedOutput").value = r.linkedOutput || "";
+    document.getElementById("qty").value = r.qty;
+    document.getElementById("width").value = r.width;
+    editIndex = i;
+    toggleLinkedOutput();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
 
-// SIRALA
-let gucSira=["RCCB","MCB","KONTAKTÖR","MOTOR KORUMA"]
-guc.sort((a,b)=>gucSira.indexOf(a.g)-gucSira.indexOf(b.g))
+  function deleteRow(i){
+    rows.splice(i,1);
+    if(editIndex === i) editIndex = -1;
+    renderAll();
+  }
 
-let kumandaSira=["RÖLE","PAKO","BUTON","LAMBA"]
-kumanda.sort((a,b)=>kumandaSira.indexOf(a.g)-kumandaSira.indexOf(b.g))
+  function clearAll(){
+    rows = [];
+    editIndex = -1;
+    renderAll();
+  }
 
-html+=`<div class="group">
-<b>${c}</b><br><br>
+  function loadDemo(){
+    rows = [
+      {group:"TMŞ", product:"3x125A", role:"ANA GİRİŞ", mount:"TABAN", addr:"GİRİŞ", linkedOutput:"", qty:1, width:14},
+      {group:"BARA", product:"4x125 Bara", role:"DAĞITIM", mount:"TABAN", addr:"DAĞITIM", linkedOutput:"", qty:1, width:18},
 
-<b>GÜÇ</b><br>
-${guc.map((x,i)=>
-`<div class="item">${x.g}</div>
-${i<guc.length-1?'<div class="ok">↓</div>':''}`
-).join("")}
+      {group:"RCCB", product:"RCCB 4x40", role:"ÇIKIŞ", mount:"DIN", addr:"ÇIKIŞ-1", linkedOutput:"", qty:1, width:7.2},
+      {group:"MCB", product:"MCB 3x32", role:"ÇIKIŞ", mount:"DIN", addr:"ÇIKIŞ-1", linkedOutput:"", qty:1, width:5.4},
+      {group:"KONTAKTÖR", product:"Kontaktör 25A", role:"ÇIKIŞ", mount:"TABAN", addr:"ÇIKIŞ-1", linkedOutput:"", qty:1, width:5.5},
+      {group:"MOTOR KORUMA", product:"MTK 6-10A", role:"ÇIKIŞ", mount:"DIN", addr:"ÇIKIŞ-1", linkedOutput:"", qty:1, width:3.5},
 
-<hr>
+      {group:"GERİLİM RÖLESİ", product:"MKS Gerilim Rölesi", role:"KUMANDA", mount:"KUMANDA", addr:"KUMANDA-1", linkedOutput:"ÇIKIŞ-1", qty:1, width:4},
+      {group:"PAKO", product:"Pako 1-0-2", role:"KUMANDA", mount:"KUMANDA", addr:"KUMANDA-1", linkedOutput:"ÇIKIŞ-1", qty:1, width:4},
+      {group:"BUTON", product:"Stop Buton", role:"KUMANDA", mount:"KUMANDA", addr:"KUMANDA-1", linkedOutput:"ÇIKIŞ-1", qty:1, width:2},
+      {group:"BUTON", product:"Start Buton", role:"KUMANDA", mount:"KUMANDA", addr:"KUMANDA-1", linkedOutput:"ÇIKIŞ-1", qty:1, width:2},
+      {group:"LAMBA", product:"Hazır Lamba", role:"KUMANDA", mount:"KUMANDA", addr:"KUMANDA-1", linkedOutput:"ÇIKIŞ-1", qty:1, width:2},
+      {group:"LAMBA", product:"Çalışıyor Lamba", role:"KUMANDA", mount:"KUMANDA", addr:"KUMANDA-1", linkedOutput:"ÇIKIŞ-1", qty:1, width:2},
+      {group:"LAMBA", product:"Arıza Lamba", role:"KUMANDA", mount:"KUMANDA", addr:"KUMANDA-1", linkedOutput:"ÇIKIŞ-1", qty:1, width:2},
 
-<b>KUMANDA</b><br>
-${kumanda.map((x,i)=>
-`<div class="item kumanda">${x.g}</div>
-${i<kumanda.length-1?'<div class="ok">→</div>':''}`
-).join("")}
+      {group:"RCCB", product:"RCCB 4x63", role:"ÇIKIŞ", mount:"DIN", addr:"ÇIKIŞ-2", linkedOutput:"", qty:1, width:7.2},
+      {group:"MOTOR KORUMA", product:"MTK 9-14A", role:"ÇIKIŞ", mount:"DIN", addr:"ÇIKIŞ-2", linkedOutput:"", qty:1, width:3.5},
 
-</div>`
+      {group:"BUTON", product:"Stop Buton", role:"KUMANDA", mount:"KUMANDA", addr:"KUMANDA-2", linkedOutput:"ÇIKIŞ-2", qty:1, width:2},
+      {group:"BUTON", product:"Start Buton", role:"KUMANDA", mount:"KUMANDA", addr:"KUMANDA-2", linkedOutput:"ÇIKIŞ-2", qty:1, width:2},
+      {group:"LAMBA", product:"Hazır Lamba", role:"KUMANDA", mount:"KUMANDA", addr:"KUMANDA-2", linkedOutput:"ÇIKIŞ-2", qty:1, width:2}
+    ];
+    editIndex = -1;
+    renderAll();
+  }
 
-})
+  function expandedRows(){
+    const list = [];
+    rows.forEach(r => {
+      for(let i=0;i<r.qty;i++){
+        list.push({...r});
+      }
+    });
+    return list;
+  }
 
-html+='</div>'
+  function buildDinLines(items, limit){
+    const dinItems = items.filter(x => x.mount === "DIN").sort((a,b)=>powerOrder(a)-powerOrder(b));
+    const lines = [];
+    let current = [];
+    let total = 0;
 
-pano.innerHTML=html
-}
+    dinItems.forEach(item => {
+      if(total + item.width > limit){
+        lines.push({items:[...current], total});
+        current = [];
+        total = 0;
+      }
+      current.push(item);
+      total += item.width;
+    });
 
+    if(current.length){
+      lines.push({items:[...current], total});
+    }
+
+    return lines;
+  }
+
+  function renderRowsTable(){
+    const tbody = document.getElementById("rowsTable");
+    if(rows.length === 0){
+      tbody.innerHTML = `<tr><td colspan="10" class="empty">Henüz satır yok.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map((r,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${r.group}</td>
+        <td>${r.product}</td>
+        <td>${r.role}</td>
+        <td>${r.mount}</td>
+        <td>${r.addr || "-"}</td>
+        <td>${r.linkedOutput || "-"}</td>
+        <td>${r.qty}</td>
+        <td>${(r.width * r.qty).toFixed(1)} cm</td>
+        <td>
+          <button class="small" onclick="editRow(${i})">Düzenle</button>
+          <button class="small red" onclick="deleteRow(${i})">Sil</button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  function renderSchema(){
+    const area = document.getElementById("schemaArea");
+    if(rows.length === 0){
+      area.innerHTML = `<div class="empty">Henüz veri yok.</div>`;
+      return;
+    }
+
+    let html = "";
+    rows.forEach((r,i)=>{
+      html += `
+        <div class="schema-box">
+          <b>${r.group}</b><br>
+          ${r.product}<br>
+          ${r.addr || "-"}<br>
+          ${r.linkedOutput ? "Bağlı: " + r.linkedOutput + "<br>" : ""}
+          Adet: ${r.qty}<br>
+          <span class="pill">${r.role}</span>
+          <span class="pill">${r.mount}</span>
+        </div>
+      `;
+      if(i < rows.length - 1){
+        html += `<div class="schema-arrow">→</div>`;
+      }
+    });
+
+    area.innerHTML = html;
+  }
+
+  function roleClass(role){
+    if(role === "ANA GİRİŞ") return "giris";
+    if(role === "DAĞITIM") return "dagitim";
+    return "cikis";
+  }
+
+  function renderPanel(){
+    const area = document.getElementById("panelArea");
+    const all = expandedRows();
+    const dinLimit = parseFloat(document.getElementById("dinLimit").value || 37);
+
+    const ana = all.filter(x => x.role === "ANA GİRİŞ");
+    const dag = all.filter(x => x.role === "DAĞITIM");
+    const outputs = all.filter(x => x.role === "ÇIKIŞ");
+    const control = all.filter(x => x.role === "KUMANDA" || x.mount === "KUMANDA");
+
+    const outputGroups = {};
+    outputs.forEach(x=>{
+      const key = x.addr || "ÇIKIŞ";
+      if(!outputGroups[key]) outputGroups[key] = [];
+      outputGroups[key].push(x);
+    });
+
+    function renderGroup(title, items, cls, linkedControl){
+      if(items.length === 0) return "";
+
+      const dinItems = items.filter(x => x.mount === "DIN").sort((a,b)=>powerOrder(a)-powerOrder(b));
+      const tabanItems = items.filter(x => x.mount === "TABAN").sort((a,b)=>powerOrder(a)-powerOrder(b));
+      const dinLines = buildDinLines(dinItems, dinLimit);
+
+      let dinHtml = "";
+      if(dinLines.length === 0){
+        dinHtml = `<div class="empty">DIN elemanı yok.</div>`;
+      } else {
+        dinHtml = dinLines.map((line, idx)=>{
+          let status = "Uygun";
+          let statusClass = "ok";
+          if(line.total > dinLimit){
+            status = "Taştı";
+            statusClass = "bad";
+          } else if(line.total > dinLimit * 0.9){
+            status = "Sınırda";
+            statusClass = "warn";
+          }
+          return `
+            <div style="margin-bottom:8px">
+              <div class="section-title">DIN-${idx+1} → ${line.total.toFixed(1)} / ${dinLimit} cm - <span class="${statusClass}">${status}</span></div>
+              ${line.items.map(x=>`
+                <div class="chip din">
+                  <b>${x.group}</b><br>
+                  ${x.product}<br>
+                  <span class="small">${kontakTipi(x.group, x.product)}</span>
+                </div>
+              `).join("")}
+            </div>
+          `;
+        }).join("");
+      }
+
+      let tabanHtml = tabanItems.length
+        ? tabanItems.map(x=>`
+            <div class="chip taban">
+              <b>${x.group}</b><br>
+              ${x.product}
+            </div>
+          `).join("")
+        : `<div class="empty">Taban elemanı yok.</div>`;
+
+      let controlHtml = linkedControl.length
+        ? [...linkedControl].sort((a,b)=>controlOrder(a)-controlOrder(b)).map((x,i,arr)=>`
+            <div class="chip kumanda">
+              <b>${x.group}</b><br>
+              ${x.product}<br>
+              <span class="small">${kontakTipi(x.group, x.product)}</span>
+            </div>${i < arr.length - 1 ? '<span class="schema-arrow">→</span>' : ''}`
+          ).join("")
+        : `<div class="empty">Bu gruba bağlı kumanda yok.</div>`;
+
+      return `
+        <div class="group ${cls}">
+          <div class="group-title">${title}</div>
+          <div class="section-title">GÜÇ - DIN</div>
+          ${dinHtml}
+          <div class="section-title">GÜÇ - TABAN</div>
+          ${tabanHtml}
+          <div class="section-title">KUMANDA</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">${controlHtml}</div>
+        </div>
+      `;
+    }
+
+    let html = `<div class="wrap">`;
+    html += renderGroup("ANA GİRİŞ", ana, roleClass("ANA GİRİŞ"), []);
+    html += renderGroup("DAĞITIM", dag, roleClass("DAĞITIM"), []);
+
+    Object.keys(outputGroups).sort().forEach(key=>{
+      const linked = control.filter(c => (c.linkedOutput || "").trim().toUpperCase() === key.trim().toUpperCase());
+      html += renderGroup(key, outputGroups[key], roleClass("ÇIKIŞ"), linked);
+    });
+
+    html += `</div>`;
+    area.innerHTML = html;
+
+    document.getElementById("sumRows").textContent = rows.length;
+    document.getElementById("sumModules").textContent = all.length;
+    document.getElementById("sumDinRows").textContent = buildDinLines(all.filter(x => x.mount === "DIN"), dinLimit).length;
+    document.getElementById("sumTaban").textContent = all.filter(x => x.mount === "TABAN").length;
+  }
+
+  function buildControlFlowNodes(items){
+    const sorted = [...items].sort((a,b)=>controlOrder(a)-controlOrder(b));
+    const nodes = [];
+
+    nodes.push({label:"Faz", info:"L"});
+
+    sorted.forEach(x=>{
+      nodes.push({
+        label:x.group,
+        info:`${x.product} | ${kontakTipi(x.group, x.product)}`
+      });
+    });
+
+    const hasContactor = sorted.some(x => x.group === "KONTAKTÖR");
+    if(!hasContactor){
+      nodes.push({label:"Kontaktör", info:"A1"});
+    }
+
+    nodes.push({label:"Nötr", info:"N / A2"});
+
+    return nodes;
+  }
+
+  function buildLampBranch(items){
+    const lamps = items.filter(x=>x.group === "LAMBA").sort((a,b)=>controlOrder(a)-controlOrder(b));
+    if(lamps.length === 0) return [];
+    return lamps.map(x=>({
+      label:"Lamba",
+      info:`${x.product} | yardımcı kontak`
+    }));
+  }
+
+  function renderFlows(){
+    const area = document.getElementById("flowArea");
+    const all = expandedRows();
+    const outputs = all.filter(x => x.role === "ÇIKIŞ");
+    const control = all.filter(x => x.role === "KUMANDA" || x.mount === "KUMANDA");
+
+    const outputGroups = {};
+    outputs.forEach(x=>{
+      const key = x.addr || "ÇIKIŞ";
+      if(!outputGroups[key]) outputGroups[key] = [];
+      outputGroups[key].push(x);
+    });
+
+    const keys = Object.keys(outputGroups).sort();
+    if(keys.length === 0){
+      area.innerHTML = `<div class="empty">Henüz çıkış yok.</div>`;
+      return;
+    }
+
+    area.innerHTML = keys.map(key=>{
+      const powerItems = [...outputGroups[key]].sort((a,b)=>powerOrder(a)-powerOrder(b));
+      const controlItems = control
+        .filter(c => (c.linkedOutput || "").trim().toUpperCase() === key.trim().toUpperCase());
+
+      const powerNodes = powerItems.map(x=>({
+        label:x.group,
+        info:`${x.product} | ${kontakTipi(x.group, x.product)}`
+      }));
+
+      const controlNodes = buildControlFlowNodes(controlItems);
+      const lampNodes = buildLampBranch(controlItems);
+
+      return `
+        <div class="flow-card">
+          <div class="flow-title">${key}</div>
+
+          <div class="section-title">GÜÇ AKIŞI</div>
+          <div class="flow-line">
+            ${powerNodes.map((n,i)=>`
+              <div class="flow-node power">
+                <b>${n.label}</b><br>
+                <span class="flow-mini">${n.info}</span>
+              </div>
+              ${i < powerNodes.length - 1 ? '<div class="flow-arrow">↓</div>' : ''}
+            `).join("")}
+          </div>
+
+          <div class="section-title">KUMANDA AKIŞI</div>
+          <div class="flow-line">
+            ${controlNodes.map((n,i)=>`
+              <div class="flow-node control">
+                <b>${n.label}</b><br>
+                <span class="flow-mini">${n.info}</span>
+              </div>
+              ${i < controlNodes.length - 1 ? '<div class="flow-arrow">→</div>' : ''}
+            `).join("")}
+          </div>
+
+          <div class="section-title">LAMBA KOLU</div>
+          <div class="flow-line">
+            ${
+              lampNodes.length
+                ? lampNodes.map((n,i)=>`
+                    <div class="flow-node control">
+                      <b>${n.label}</b><br>
+                      <span class="flow-mini">${n.info}</span>
+                    </div>
+                    ${i < lampNodes.length - 1 ? '<div class="flow-arrow">→</div>' : ''}
+                  `).join("")
+                : '<div class="empty">Lamba kolu yok.</div>'
+            }
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderBom(){
+    const area = document.getElementById("bomArea");
+    const all = expandedRows();
+
+    if(all.length === 0){
+      area.innerHTML = `<div class="empty">Henüz veri yok.</div>`;
+      return;
+    }
+
+    const bom = {};
+    all.forEach(x=>{
+      const key = `${x.group} | ${x.product}`;
+      bom[key] = (bom[key] || 0) + 1;
+    });
+
+    let html = `<table><thead><tr><th>Ürün</th><th>Toplam Adet</th></tr></thead><tbody>`;
+    Object.keys(bom).forEach(k=>{
+      html += `<tr><td>${k}</td><td>${bom[k]}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+
+    area.innerHTML = html;
+  }
+
+  function renderDinResult(){
+    const area = document.getElementById("dinResult");
+    const all = expandedRows();
+    const limit = parseFloat(document.getElementById("dinLimit").value || 37);
+    const lines = buildDinLines(all, limit);
+
+    if(lines.length === 0){
+      area.innerHTML = `<div class="empty">DIN elemanı yok.</div>`;
+      return;
+    }
+
+    area.innerHTML = lines.map((line, i)=>{
+      let status = "Uygun";
+      let cls = "ok";
+      if(line.total > limit){
+        status = "Taştı";
+        cls = "bad";
+      } else if(line.total > limit * 0.9){
+        status = "Sınırda";
+        cls = "warn";
+      }
+
+      return `
+        <div style="border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px">
+          <b>DIN-${i+1}</b> → ${line.total.toFixed(1)} / ${limit} cm → <span class="${cls}">${status}</span><br><br>
+          ${line.items.map(x=>`<span class="chip din">${x.group}<br>${x.product}<br>${x.width} cm</span>`).join("")}
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderAll(){
+    renderRowsTable();
+    renderSchema();
+    renderPanel();
+    renderFlows();
+    renderBom();
+    renderDinResult();
+  }
+
+  toggleLinkedOutput();
+  loadDemo();
 </script>
-
 </body>
 </html>
