@@ -2,44 +2,37 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>VX29 MASTER - AKIŞ MOTORU</title>
+<title>VX30 MASTER - EDIT + KÜTÜPHANE</title>
 
 <style>
 body{font-family:Arial;background:#f3f6fb;padding:10px}
-
 .card{background:#fff;padding:12px;margin-bottom:10px;border-radius:10px}
-
 input,select{padding:6px;margin:3px}
-
 button{padding:6px 10px;background:#2563eb;color:#fff;border:none;border-radius:6px}
-
-canvas{
-background:#fff;
-border:1px solid #ccc;
-margin-top:10px;
-}
-
+table{width:100%;border-collapse:collapse;margin-top:10px}
+td,th{border:1px solid #ccc;padding:6px;text-align:center}
+canvas{background:#fff;border:1px solid #ccc;margin-top:10px}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-<b>ELEMAN EKLE</b><br><br>
+<b>ELEMAN EKLE / DÜZENLE</b><br><br>
 
 Grup:
-<select id="g">
+<select id="g" onchange="urunDoldur()">
 <option>RCCB</option>
 <option>MCB</option>
 <option>KONTAKTÖR</option>
-<option>MOTOR KORUMA</option>
+<option>MOTOR</option>
 <option>BUTON</option>
 <option>LAMBA</option>
 <option>PAKO</option>
 </select>
 
 Ürün:
-<input id="u" placeholder="Örn: Kontaktör 25A">
+<select id="u"></select>
 
 Rol:
 <select id="r">
@@ -53,41 +46,118 @@ Adres:
 Bağlı:
 <input id="b" placeholder="ÇIKIŞ-1">
 
-<button onclick="ekle()">EKLE</button>
+<button onclick="ekle()">EKLE / GÜNCELLE</button>
 <button onclick="temizle()">TEMİZLE</button>
+
+</div>
+
+<div class="card">
+<b>VERİ TABLOSU</b>
+<table id="t"></table>
 </div>
 
 <div class="card">
 <b>ÇİZİM</b>
-<canvas id="c" width="900" height="600"></canvas>
+<canvas id="c" width="1000" height="600"></canvas>
 </div>
 
 <script>
 
+// KÜTÜPHANE
+let kutuphane={
+RCCB:["RCCB 4x40","RCCB 4x63"],
+MCB:["MCB 3x16","MCB 3x32"],
+KONTAKTÖR:["Kontaktör 9A","Kontaktör 25A"],
+MOTOR:["MTK 6-10A","MTK 9-14A"],
+BUTON:["Start","Stop"],
+LAMBA:["Çalışıyor","Arıza"],
+PAKO:["Pako 1-0-2"]
+}
+
 let data=[]
+let editIndex=null
+
+urunDoldur()
+
+function urunDoldur(){
+let grup=g.value
+u.innerHTML=""
+kutuphane[grup].forEach(x=>{
+let opt=document.createElement("option")
+opt.text=x
+u.add(opt)
+})
+}
 
 function ekle(){
-data.push({
+
+let obj={
 g:g.value,
 u:u.value,
 r:r.value,
 a:a.value,
 b:b.value
-})
+}
+
+if(editIndex===null){
+data.push(obj)
+}else{
+data[editIndex]=obj
+editIndex=null
+}
+
+render()
 ciz()
+}
+
+function sil(i){
+data.splice(i,1)
+render()
+ciz()
+}
+
+function duzenle(i){
+let x=data[i]
+g.value=x.g
+urunDoldur()
+u.value=x.u
+r.value=x.r
+a.value=x.a
+b.value=x.b
+editIndex=i
 }
 
 function temizle(){
 data=[]
+render()
 ciz()
+}
+
+function render(){
+
+t.innerHTML="<tr><th>#</th><th>Grup</th><th>Ürün</th><th>Rol</th><th>Adres</th><th>Bağlı</th><th>İşlem</th></tr>"
+
+data.forEach((x,i)=>{
+t.innerHTML+=`
+<tr>
+<td>${i+1}</td>
+<td>${x.g}</td>
+<td>${x.u}</td>
+<td>${x.r}</td>
+<td>${x.a}</td>
+<td>${x.b}</td>
+<td>
+<button onclick="duzenle(${i})">Düzenle</button>
+<button onclick="sil(${i})" style="background:red">Sil</button>
+</td>
+</tr>`
+})
 }
 
 function ciz(){
 
-let canvas=document.getElementById("c")
-let ctx=canvas.getContext("2d")
-
-ctx.clearRect(0,0,900,600)
+let ctx=c.getContext("2d")
+ctx.clearRect(0,0,1000,600)
 
 let gruplar={}
 
@@ -101,9 +171,8 @@ let xPos=100
 
 Object.keys(gruplar).forEach(k=>{
 
-let yPos=50
+let yPos=60
 
-// ANA HAT
 ctx.beginPath()
 ctx.moveTo(xPos,30)
 ctx.lineTo(xPos,550)
@@ -111,52 +180,40 @@ ctx.stroke()
 
 ctx.fillText(k,xPos-20,20)
 
-// ELEMANLAR
 gruplar[k].forEach((el,i)=>{
 
-let boxY=yPos+(i*80)
+let y=yPos+(i*80)
 
-// çizgi
 ctx.beginPath()
-ctx.moveTo(xPos,boxY-20)
-ctx.lineTo(xPos,boxY)
+ctx.moveTo(xPos,y-20)
+ctx.lineTo(xPos,y)
 ctx.stroke()
 
-// kutu
-ctx.strokeRect(xPos-40,boxY,80,40)
-
-// yazı
-ctx.fillText(el.g,xPos-30,boxY+15)
-ctx.fillText(el.u,xPos-30,boxY+30)
+ctx.strokeRect(xPos-40,y,80,40)
+ctx.fillText(el.g,xPos-30,y+15)
+ctx.fillText(el.u,xPos-30,y+30)
 
 })
 
-// KUMANDA (yan)
-let kumanda = data.filter(x=>x.r=="KUMANDA" && x.b==k)
-
-let ky=100
+let kumanda=data.filter(x=>x.r=="KUMANDA" && x.b==k)
 
 kumanda.forEach((el,i)=>{
 
-let kx=xPos+120
-let boxY=ky+(i*80)
+let kx=xPos+140
+let y=80+(i*80)
 
-// bağlantı çizgisi
 ctx.beginPath()
-ctx.moveTo(xPos,boxY+20)
-ctx.lineTo(kx-40,boxY+20)
+ctx.moveTo(xPos,y+20)
+ctx.lineTo(kx-40,y+20)
 ctx.stroke()
 
-// kutu
-ctx.strokeRect(kx-40,boxY,80,40)
-
-// yazı
-ctx.fillText(el.g,kx-30,boxY+15)
-ctx.fillText(el.u,kx-30,boxY+30)
+ctx.strokeRect(kx-40,y,80,40)
+ctx.fillText(el.g,kx-30,y+15)
+ctx.fillText(el.u,kx-30,y+30)
 
 })
 
-xPos+=250
+xPos+=300
 
 })
 
