@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>VX28 Şema Motoru</title>
+<title>VX29 MASTER - AKIŞ MOTORU</title>
 
 <style>
 body{font-family:Arial;background:#f3f6fb;padding:10px}
@@ -10,6 +10,7 @@ body{font-family:Arial;background:#f3f6fb;padding:10px}
 .card{background:#fff;padding:12px;margin-bottom:10px;border-radius:10px}
 
 input,select{padding:6px;margin:3px}
+
 button{padding:6px 10px;background:#2563eb;color:#fff;border:none;border-radius:6px}
 
 canvas{
@@ -17,8 +18,10 @@ background:#fff;
 border:1px solid #ccc;
 margin-top:10px;
 }
+
 </style>
 </head>
+
 <body>
 
 <div class="card">
@@ -32,10 +35,11 @@ Grup:
 <option>MOTOR KORUMA</option>
 <option>BUTON</option>
 <option>LAMBA</option>
+<option>PAKO</option>
 </select>
 
 Ürün:
-<input id="u" placeholder="Örn: 4x40">
+<input id="u" placeholder="Örn: Kontaktör 25A">
 
 Rol:
 <select id="r">
@@ -50,11 +54,13 @@ Bağlı:
 <input id="b" placeholder="ÇIKIŞ-1">
 
 <button onclick="ekle()">EKLE</button>
-<button onclick="ciz()">ÇİZ</button>
-
+<button onclick="temizle()">TEMİZLE</button>
 </div>
 
-<canvas id="c" width="1000" height="500"></canvas>
+<div class="card">
+<b>ÇİZİM</b>
+<canvas id="c" width="900" height="600"></canvas>
+</div>
 
 <script>
 
@@ -68,55 +74,89 @@ r:r.value,
 a:a.value,
 b:b.value
 })
+ciz()
+}
+
+function temizle(){
+data=[]
+ciz()
 }
 
 function ciz(){
 
-let ctx = document.getElementById("c").getContext("2d")
-ctx.clearRect(0,0,1000,500)
+let canvas=document.getElementById("c")
+let ctx=canvas.getContext("2d")
 
-let x=50
-let y=100
+ctx.clearRect(0,0,900,600)
 
-let guc = data.filter(x=>x.r=="ÇIKIŞ")
+let gruplar={}
 
-guc.forEach((e,i)=>{
+data.forEach(x=>{
+let key=x.a
+if(!gruplar[key]) gruplar[key]=[]
+gruplar[key].push(x)
+})
 
-// kutu
-ctx.strokeRect(x,y,100,40)
-ctx.fillText(e.g, x+10, y+15)
-ctx.fillText(e.u, x+10, y+30)
+let xPos=100
+
+Object.keys(gruplar).forEach(k=>{
+
+let yPos=50
+
+// ANA HAT
+ctx.beginPath()
+ctx.moveTo(xPos,30)
+ctx.lineTo(xPos,550)
+ctx.stroke()
+
+ctx.fillText(k,xPos-20,20)
+
+// ELEMANLAR
+gruplar[k].forEach((el,i)=>{
+
+let boxY=yPos+(i*80)
 
 // çizgi
-if(i>0){
 ctx.beginPath()
-ctx.moveTo(x-50+100,y+20)
-ctx.lineTo(x,y+20)
+ctx.moveTo(xPos,boxY-20)
+ctx.lineTo(xPos,boxY)
 ctx.stroke()
-}
 
-x+=150
+// kutu
+ctx.strokeRect(xPos-40,boxY,80,40)
+
+// yazı
+ctx.fillText(el.g,xPos-30,boxY+15)
+ctx.fillText(el.u,xPos-30,boxY+30)
 
 })
 
-// kumanda
-let kum = data.filter(x=>x.r=="KUMANDA")
+// KUMANDA (yan)
+let kumanda = data.filter(x=>x.r=="KUMANDA" && x.b==k)
 
-let ky=250
-let kx=50
+let ky=100
 
-kum.forEach((e,i)=>{
+kumanda.forEach((el,i)=>{
 
-ctx.strokeRect(kx,ky,100,40)
-ctx.fillText(e.g, kx+10, ky+15)
+let kx=xPos+120
+let boxY=ky+(i*80)
 
-// bağlantı çizgisi yukarı
+// bağlantı çizgisi
 ctx.beginPath()
-ctx.moveTo(kx+50,ky)
-ctx.lineTo(kx+50,150)
+ctx.moveTo(xPos,boxY+20)
+ctx.lineTo(kx-40,boxY+20)
 ctx.stroke()
 
-kx+=150
+// kutu
+ctx.strokeRect(kx-40,boxY,80,40)
+
+// yazı
+ctx.fillText(el.g,kx-30,boxY+15)
+ctx.fillText(el.u,kx-30,boxY+30)
+
+})
+
+xPos+=250
 
 })
 
