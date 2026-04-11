@@ -1,14 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>VX26 MASTER</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VX MASTER FULL + ÇİZİM MOTORU</title>
 
 <style>
 body{font-family:Arial;background:#f3f6fb;padding:10px}
+
 .card{background:#fff;padding:12px;margin-bottom:10px;border-radius:10px}
-.item{border:1px solid #999;padding:8px;margin:6px;text-align:center;background:#eef}
-.kumanda{background:#f5f3ff}
+
+select,input{padding:6px;margin:3px}
+
+button{padding:6px 10px;background:#2563eb;color:#fff;border:none;border-radius:6px}
+
+.wrap{display:flex;flex-direction:column;gap:10px}
+
+.line{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.box{
+  background:#e0f2fe;
+  padding:8px 10px;
+  border-radius:6px;
+  border:1px solid #999;
+  font-size:13px;
+}
+
+.arrow{
+  font-size:18px;
+  color:red;
+}
+
+.kumanda{
+  background:#f3e8ff;
+}
+
+h3{margin:5px 0}
 </style>
 
 </head>
@@ -19,21 +51,24 @@ body{font-family:Arial;background:#f3f6fb;padding:10px}
 
 Grup:
 <select id="g">
+<option>TMŞ</option>
 <option>RCCB</option>
 <option>MCB</option>
 <option>KONTAKTÖR</option>
 <option>MOTOR KORUMA</option>
-<option>BUTON</option>
+<option>GERİLİM RÖLESİ</option>
 <option>PAKO</option>
-<option>RÖLE</option>
+<option>BUTON</option>
 <option>LAMBA</option>
 </select>
 
 Ürün:
-<input id="u" placeholder="örn: Start Buton">
+<input id="u" placeholder="3x125A / Kontaktör 25A">
 
 Rol:
 <select id="r">
+<option>ANA GİRİŞ</option>
+<option>DAĞITIM</option>
 <option>ÇIKIŞ</option>
 <option>KUMANDA</option>
 </select>
@@ -41,17 +76,24 @@ Rol:
 Adres:
 <input id="a" placeholder="ÇIKIŞ-1">
 
+Bağlı Olduğu:
+<input id="b" placeholder="ÇIKIŞ-1">
+
+Adet:
+<input id="adet" value="1">
+
 <button onclick="ekle()">EKLE</button>
 <button onclick="temizle()">TEMİZLE</button>
+
 </div>
 
 <div class="card">
-<b>GÜÇ AKIŞI</b>
+<h3>GÜÇ AKIŞI</h3>
 <div id="guc"></div>
 </div>
 
 <div class="card kumanda">
-<b>KUMANDA AKIŞI</b>
+<h3>KUMANDA AKIŞI</h3>
 <div id="kumanda"></div>
 </div>
 
@@ -60,12 +102,18 @@ Adres:
 let data=[]
 
 function ekle(){
+let adet=parseInt(document.getElementById("adet").value)
+
+for(let i=0;i<adet;i++){
 data.push({
 g:g.value,
 u:u.value,
 r:r.value,
-a:a.value
+a:a.value,
+b:b.value
 })
+}
+
 render()
 }
 
@@ -74,84 +122,40 @@ data=[]
 render()
 }
 
-function baglanti(e){
-
-if(e.g=="BUTON"){
-if(e.u.toLowerCase().includes("stop")) return "NC 21-22"
-if(e.u.toLowerCase().includes("start")) return "NO 13-14"
-}
-
-if(e.g=="KONTAKTÖR") return "A1-A2"
-if(e.g=="MOTOR KORUMA") return "13-14"
-if(e.g=="PAKO") return "1-0-2"
-if(e.g=="RÖLE") return "1-2"
-
-return "-"
-}
-
 function render(){
-
-let cikislar={}
-
-data.forEach(x=>{
-if(!cikislar[x.a]) cikislar[x.a]=[]
-cikislar[x.a].push(x)
-})
 
 // GÜÇ
 let gucHTML=""
 
-Object.keys(cikislar).forEach(c=>{
+let cikislar = [...new Set(data.filter(x=>x.r=="ÇIKIŞ").map(x=>x.a))]
 
-let list = cikislar[c].filter(x=>x.r=="ÇIKIŞ")
+cikislar.forEach(c => {
 
-let order=["RCCB","MCB","KONTAKTÖR","MOTOR KORUMA"]
+let elemanlar = data.filter(x=>x.a==c && x.r!="KUMANDA")
 
-list.sort((a,b)=>order.indexOf(a.g)-order.indexOf(b.g))
+gucHTML += `<div class="line"><b>${c}</b>`
 
-gucHTML+=`<b>${c}</b><br>`
+elemanlar.forEach((e,i)=>{
+gucHTML += `<div class="box">${e.g}<br>${e.u}</div>`
 
-list.forEach((e,i)=>{
-gucHTML+=`
-<div class="item">
-${e.g}<br>${e.u}
-</div>
-${i<list.length-1?"↓":""}
-`
+if(i < elemanlar.length-1){
+gucHTML += `<div class="arrow">→</div>`
+}
 })
 
-gucHTML+="<br><br>"
+gucHTML += `</div><br>`
 })
 
-guc.innerHTML=gucHTML
+guc.innerHTML = gucHTML
 
 
 // KUMANDA
-let kumHTML=""
+let kumandaHTML=""
 
-Object.keys(cikislar).forEach(c=>{
+cikislar.forEach(c => {
 
-let list = cikislar[c].filter(x=>x.r=="KUMANDA")
+let elemanlar = data.filter(x=>x.b==c)
 
-kumHTML+=`<b>${c}</b><br>FAZ<br>↓`
+if(elemanlar.length==0) return
 
-list.forEach(e=>{
-kumHTML+=`
-<div class="item kumanda">
-${e.g}<br>${e.u}<br>
-${baglanti(e)}
-</div>↓
-`
-})
-
-kumHTML+=`A1<br><br>`
-})
-
-kumanda.innerHTML=kumHTML
-
-}
-
-</script>
-
-</body>
-</html>
+kumandaHTML += `<div class="line
