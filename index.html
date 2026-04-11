@@ -2,47 +2,22 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VX MASTER FULL + ÇİZİM MOTORU</title>
+<title>VX28 Şema Motoru</title>
 
 <style>
 body{font-family:Arial;background:#f3f6fb;padding:10px}
 
 .card{background:#fff;padding:12px;margin-bottom:10px;border-radius:10px}
 
-select,input{padding:6px;margin:3px}
-
+input,select{padding:6px;margin:3px}
 button{padding:6px 10px;background:#2563eb;color:#fff;border:none;border-radius:6px}
 
-.wrap{display:flex;flex-direction:column;gap:10px}
-
-.line{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
+canvas{
+background:#fff;
+border:1px solid #ccc;
+margin-top:10px;
 }
-
-.box{
-  background:#e0f2fe;
-  padding:8px 10px;
-  border-radius:6px;
-  border:1px solid #999;
-  font-size:13px;
-}
-
-.arrow{
-  font-size:18px;
-  color:red;
-}
-
-.kumanda{
-  background:#f3e8ff;
-}
-
-h3{margin:5px 0}
 </style>
-
 </head>
 <body>
 
@@ -51,24 +26,19 @@ h3{margin:5px 0}
 
 Grup:
 <select id="g">
-<option>TMŞ</option>
 <option>RCCB</option>
 <option>MCB</option>
 <option>KONTAKTÖR</option>
 <option>MOTOR KORUMA</option>
-<option>GERİLİM RÖLESİ</option>
-<option>PAKO</option>
 <option>BUTON</option>
 <option>LAMBA</option>
 </select>
 
 Ürün:
-<input id="u" placeholder="3x125A / Kontaktör 25A">
+<input id="u" placeholder="Örn: 4x40">
 
 Rol:
 <select id="r">
-<option>ANA GİRİŞ</option>
-<option>DAĞITIM</option>
 <option>ÇIKIŞ</option>
 <option>KUMANDA</option>
 </select>
@@ -76,35 +46,21 @@ Rol:
 Adres:
 <input id="a" placeholder="ÇIKIŞ-1">
 
-Bağlı Olduğu:
+Bağlı:
 <input id="b" placeholder="ÇIKIŞ-1">
 
-Adet:
-<input id="adet" value="1">
-
 <button onclick="ekle()">EKLE</button>
-<button onclick="temizle()">TEMİZLE</button>
+<button onclick="ciz()">ÇİZ</button>
 
 </div>
 
-<div class="card">
-<h3>GÜÇ AKIŞI</h3>
-<div id="guc"></div>
-</div>
-
-<div class="card kumanda">
-<h3>KUMANDA AKIŞI</h3>
-<div id="kumanda"></div>
-</div>
+<canvas id="c" width="1000" height="500"></canvas>
 
 <script>
 
 let data=[]
 
 function ekle(){
-let adet=parseInt(document.getElementById("adet").value)
-
-for(let i=0;i<adet;i++){
 data.push({
 g:g.value,
 u:u.value,
@@ -114,48 +70,59 @@ b:b.value
 })
 }
 
-render()
+function ciz(){
+
+let ctx = document.getElementById("c").getContext("2d")
+ctx.clearRect(0,0,1000,500)
+
+let x=50
+let y=100
+
+let guc = data.filter(x=>x.r=="ÇIKIŞ")
+
+guc.forEach((e,i)=>{
+
+// kutu
+ctx.strokeRect(x,y,100,40)
+ctx.fillText(e.g, x+10, y+15)
+ctx.fillText(e.u, x+10, y+30)
+
+// çizgi
+if(i>0){
+ctx.beginPath()
+ctx.moveTo(x-50+100,y+20)
+ctx.lineTo(x,y+20)
+ctx.stroke()
 }
 
-function temizle(){
-data=[]
-render()
-}
+x+=150
 
-function render(){
-
-// GÜÇ
-let gucHTML=""
-
-let cikislar = [...new Set(data.filter(x=>x.r=="ÇIKIŞ").map(x=>x.a))]
-
-cikislar.forEach(c => {
-
-let elemanlar = data.filter(x=>x.a==c && x.r!="KUMANDA")
-
-gucHTML += `<div class="line"><b>${c}</b>`
-
-elemanlar.forEach((e,i)=>{
-gucHTML += `<div class="box">${e.g}<br>${e.u}</div>`
-
-if(i < elemanlar.length-1){
-gucHTML += `<div class="arrow">→</div>`
-}
 })
 
-gucHTML += `</div><br>`
+// kumanda
+let kum = data.filter(x=>x.r=="KUMANDA")
+
+let ky=250
+let kx=50
+
+kum.forEach((e,i)=>{
+
+ctx.strokeRect(kx,ky,100,40)
+ctx.fillText(e.g, kx+10, ky+15)
+
+// bağlantı çizgisi yukarı
+ctx.beginPath()
+ctx.moveTo(kx+50,ky)
+ctx.lineTo(kx+50,150)
+ctx.stroke()
+
+kx+=150
+
 })
 
-guc.innerHTML = gucHTML
+}
 
+</script>
 
-// KUMANDA
-let kumandaHTML=""
-
-cikislar.forEach(c => {
-
-let elemanlar = data.filter(x=>x.b==c)
-
-if(elemanlar.length==0) return
-
-kumandaHTML += `<div class="line
+</body>
+</html>
