@@ -1,225 +1,708 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>VX30 MASTER - EDIT + KÜTÜPHANE</title>
-
-<style>
-body{font-family:Arial;background:#f3f6fb;padding:10px}
-.card{background:#fff;padding:12px;margin-bottom:10px;border-radius:10px}
-input,select{padding:6px;margin:3px}
-button{padding:6px 10px;background:#2563eb;color:#fff;border:none;border-radius:6px}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-td,th{border:1px solid #ccc;padding:6px;text-align:center}
-canvas{background:#fff;border:1px solid #ccc;margin-top:10px}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VX31 MASTER - Takım Sistemi</title>
+  <style>
+    :root{
+      --bg:#f3f6fb;
+      --card:#ffffff;
+      --border:#d8e0ea;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --blue:#2563eb;
+      --green:#16a34a;
+      --red:#dc2626;
+      --chip:#eef6ff;
+      --chip2:#fef3c7;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      padding:12px;
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      margin-bottom:12px;
+    }
+    .title{
+      font-size:22px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:end;
+    }
+    .field{
+      min-width:140px;
+      flex:1;
+    }
+    .field.small{
+      flex:0 0 110px;
+      min-width:110px;
+    }
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    input,select{
+      width:100%;
+      padding:9px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:#fff;
+      font-size:14px;
+    }
+    button{
+      border:none;
+      border-radius:8px;
+      padding:10px 14px;
+      font-size:14px;
+      cursor:pointer;
+      background:var(--blue);
+      color:#fff;
+    }
+    button.green{background:var(--green)}
+    button.red{background:var(--red)}
+    button.gray{background:#6b7280}
+    button.small{
+      padding:6px 10px;
+      font-size:12px;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    th,td{
+      border-bottom:1px solid #e8edf5;
+      padding:8px 6px;
+      text-align:left;
+      vertical-align:top;
+    }
+    th{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1.1fr 0.9fr;
+      gap:12px;
+    }
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:8px;
+    }
+    .summary-box{
+      background:#f8fafc;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px;
+    }
+    .summary-box b{
+      display:block;
+      margin-top:4px;
+      font-size:20px;
+    }
+    .chip{
+      display:inline-block;
+      background:var(--chip);
+      border:1px solid #cfe0ff;
+      border-radius:8px;
+      padding:8px 10px;
+      margin:4px;
+      font-size:12px;
+      line-height:1.35;
+      min-width:120px;
+      text-align:center;
+    }
+    .chip.taban{
+      background:var(--chip2);
+      border-color:#ead9a2;
+    }
+    .group-box{
+      border:2px solid #cad5e2;
+      border-radius:12px;
+      padding:10px;
+      margin-bottom:10px;
+      background:#fff;
+    }
+    .group-title{
+      font-size:18px;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+    .empty{
+      color:var(--muted);
+      font-size:13px;
+      padding:8px 0;
+    }
+    .schema-line{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      margin-bottom:8px;
+    }
+    .schema-box{
+      background:#dbeafe;
+      border:1px solid #bfd7ff;
+      border-radius:10px;
+      padding:10px;
+      min-width:150px;
+      text-align:center;
+      font-size:13px;
+      line-height:1.35;
+    }
+    .schema-arrow{
+      color:#64748b;
+      font-size:18px;
+    }
+    canvas{
+      background:#fff;
+      border:1px solid #d1d5db;
+      border-radius:10px;
+      width:100%;
+      max-width:100%;
+      height:auto;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="card">
-<b>ELEMAN EKLE / DÜZENLE</b><br><br>
+  <div class="card">
+    <div class="title">VX31 MASTER — Takım Sistemi</div>
+    <div class="sub">Çıkış takımı oluştur, takım sayısı gir, sistem otomatik çarpsın. Kumanda bir sonraki aşamada ayrı takım mantığıyla bağlanacak.</div>
 
-Grup:
-<select id="g" onchange="urunDoldur()">
-<option>RCCB</option>
-<option>MCB</option>
-<option>KONTAKTÖR</option>
-<option>MOTOR</option>
-<option>BUTON</option>
-<option>LAMBA</option>
-<option>PAKO</option>
-</select>
+    <div class="row">
+      <div class="field">
+        <label>Takım Adı</label>
+        <input id="teamName" placeholder="Örn: ÇIKIŞ-1 Motor Takımı">
+      </div>
+      <div class="field">
+        <label>Adres / Çıkış</label>
+        <input id="teamAddr" placeholder="Örn: ÇIKIŞ-1">
+      </div>
+      <div class="field small">
+        <label>Takım Sayısı</label>
+        <input id="teamCount" type="number" min="1" value="1">
+      </div>
+    </div>
+  </div>
 
-Ürün:
-<select id="u"></select>
+  <div class="card">
+    <div class="title" style="font-size:18px;">Takım İçine Ürün Ekle</div>
 
-Rol:
-<select id="r">
-<option>ÇIKIŞ</option>
-<option>KUMANDA</option>
-</select>
+    <div class="row">
+      <div class="field">
+        <label>Grup</label>
+        <select id="itemGroup" onchange="fillProducts()">
+          <option>RCCB</option>
+          <option>MCB</option>
+          <option>KONTAKTÖR</option>
+          <option>MOTOR KORUMA</option>
+          <option>RK SİYAH</option>
+          <option>RK MAVİ</option>
+          <option>RK GND</option>
+          <option>BARA</option>
+        </select>
+      </div>
 
-Adres:
-<input id="a" placeholder="ÇIKIŞ-1">
+      <div class="field">
+        <label>Ürün</label>
+        <select id="itemProduct"></select>
+      </div>
 
-Bağlı:
-<input id="b" placeholder="ÇIKIŞ-1">
+      <div class="field">
+        <label>Montaj</label>
+        <select id="itemMount">
+          <option>DIN</option>
+          <option>TABAN</option>
+          <option>SERBEST</option>
+        </select>
+      </div>
 
-<button onclick="ekle()">EKLE / GÜNCELLE</button>
-<button onclick="temizle()">TEMİZLE</button>
+      <div class="field small">
+        <label>Birim Adet</label>
+        <input id="itemQty" type="number" min="1" value="1">
+      </div>
 
-</div>
+      <div class="field small">
+        <label>Genişlik (cm)</label>
+        <input id="itemWidth" type="number" min="0" step="0.1" value="7">
+      </div>
 
-<div class="card">
-<b>VERİ TABLOSU</b>
-<table id="t"></table>
-</div>
+      <div class="field small">
+        <button onclick="addItem()">Takıma Ekle</button>
+      </div>
+    </div>
+  </div>
 
-<div class="card">
-<b>ÇİZİM</b>
-<canvas id="c" width="1000" height="600"></canvas>
-</div>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div class="title" style="font-size:18px;">Takım İçeriği</div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Grup</th>
+              <th>Ürün</th>
+              <th>Montaj</th>
+              <th>Birim Adet</th>
+              <th>W</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="itemsTable"></tbody>
+        </table>
 
-<script>
+        <div class="row" style="margin-top:10px;">
+          <button class="green" onclick="saveTeam()">Takımı Kaydet / Güncelle</button>
+          <button class="gray" onclick="loadDemo()">Demo Yükle</button>
+          <button class="red" onclick="clearAll()">Her Şeyi Temizle</button>
+        </div>
+      </div>
 
-// KÜTÜPHANE
-let kutuphane={
-RCCB:["RCCB 4x40","RCCB 4x63"],
-MCB:["MCB 3x16","MCB 3x32"],
-KONTAKTÖR:["Kontaktör 9A","Kontaktör 25A"],
-MOTOR:["MTK 6-10A","MTK 9-14A"],
-BUTON:["Start","Stop"],
-LAMBA:["Çalışıyor","Arıza"],
-PAKO:["Pako 1-0-2"]
-}
+      <div class="card">
+        <div class="title" style="font-size:18px;">Kaydedilen Takımlar</div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Takım Adı</th>
+              <th>Adres</th>
+              <th>Takım Sayısı</th>
+              <th>İçerik</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="teamsTable"></tbody>
+        </table>
+      </div>
 
-let data=[]
-let editIndex=null
+      <div class="card">
+        <div class="title" style="font-size:18px;">Şema Özeti</div>
+        <div id="schemaArea"></div>
+      </div>
+    </div>
 
-urunDoldur()
+    <div>
+      <div class="card">
+        <div class="title" style="font-size:18px;">Özet</div>
+        <div class="summary">
+          <div class="summary-box">Takım Sayısı<b id="sumTeams">0</b></div>
+          <div class="summary-box">Toplam Çarpılmış Eleman<b id="sumExpanded">0</b></div>
+          <div class="summary-box">DIN Toplam (cm)<b id="sumDin">0</b></div>
+          <div class="summary-box">Taban Toplam (cm)<b id="sumTaban">0</b></div>
+        </div>
+      </div>
 
-function urunDoldur(){
-let grup=g.value
-u.innerHTML=""
-kutuphane[grup].forEach(x=>{
-let opt=document.createElement("option")
-opt.text=x
-u.add(opt)
-})
-}
+      <div class="card">
+        <div class="title" style="font-size:18px;">Malzeme Listesi</div>
+        <div id="bomArea"></div>
+      </div>
 
-function ekle(){
+      <div class="card">
+        <div class="title" style="font-size:18px;">Takım Çizimi</div>
+        <canvas id="teamCanvas" width="1100" height="650"></canvas>
+      </div>
+    </div>
+  </div>
 
-let obj={
-g:g.value,
-u:u.value,
-r:r.value,
-a:a.value,
-b:b.value
-}
+  <script>
+    const library = {
+      "RCCB": ["RCCB 4x40 30mA", "RCCB 4x63 30mA", "RCCB 4x40 300mA"],
+      "MCB": ["MCB 3x16", "MCB 3x25", "MCB 3x32", "MCB 1x16"],
+      "KONTAKTÖR": ["Kontaktör 9A", "Kontaktör 18A", "Kontaktör 25A", "Kontaktör 32A"],
+      "MOTOR KORUMA": ["MTK 4-6.3A", "MTK 6-10A", "MTK 9-14A", "MTK 10-16A"],
+      "RK SİYAH": ["RK Siyah 6mm", "RK Siyah 10mm", "RK Siyah 16mm"],
+      "RK MAVİ": ["RK Mavi 6mm", "RK Mavi 10mm", "RK Mavi 16mm"],
+      "RK GND": ["RK GND 6mm", "RK GND 10mm", "RK GND 16mm"],
+      "BARA": ["4x80 Bara", "4x100 Bara", "4x125 Bara"]
+    };
 
-if(editIndex===null){
-data.push(obj)
-}else{
-data[editIndex]=obj
-editIndex=null
-}
+    let teamItems = [];
+    let teams = [];
+    let editItemIndex = -1;
+    let editTeamIndex = -1;
 
-render()
-ciz()
-}
+    function fillProducts(){
+      const group = document.getElementById("itemGroup").value;
+      const productSelect = document.getElementById("itemProduct");
+      productSelect.innerHTML = "";
+      (library[group] || []).forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p;
+        opt.textContent = p;
+        productSelect.appendChild(opt);
+      });
+    }
 
-function sil(i){
-data.splice(i,1)
-render()
-ciz()
-}
+    function addItem(){
+      const item = {
+        group: document.getElementById("itemGroup").value,
+        product: document.getElementById("itemProduct").value,
+        mount: document.getElementById("itemMount").value,
+        qty: Number(document.getElementById("itemQty").value || 1),
+        width: parseFloat(document.getElementById("itemWidth").value || 0)
+      };
 
-function duzenle(i){
-let x=data[i]
-g.value=x.g
-urunDoldur()
-u.value=x.u
-r.value=x.r
-a.value=x.a
-b.value=x.b
-editIndex=i
-}
+      if(!item.product){
+        alert("Ürün seç.");
+        return;
+      }
+      if(item.qty < 1){
+        alert("Birim adet 1 veya daha büyük olmalı.");
+        return;
+      }
+      if(item.width < 0){
+        alert("Genişlik 0 veya daha büyük olmalı.");
+        return;
+      }
 
-function temizle(){
-data=[]
-render()
-ciz()
-}
+      if(editItemIndex >= 0){
+        teamItems[editItemIndex] = item;
+        editItemIndex = -1;
+      } else {
+        teamItems.push(item);
+      }
 
-function render(){
+      document.getElementById("itemQty").value = 1;
+      renderAll();
+    }
 
-t.innerHTML="<tr><th>#</th><th>Grup</th><th>Ürün</th><th>Rol</th><th>Adres</th><th>Bağlı</th><th>İşlem</th></tr>"
+    function editItem(i){
+      const item = teamItems[i];
+      document.getElementById("itemGroup").value = item.group;
+      fillProducts();
+      document.getElementById("itemProduct").value = item.product;
+      document.getElementById("itemMount").value = item.mount;
+      document.getElementById("itemQty").value = item.qty;
+      document.getElementById("itemWidth").value = item.width;
+      editItemIndex = i;
+    }
 
-data.forEach((x,i)=>{
-t.innerHTML+=`
-<tr>
-<td>${i+1}</td>
-<td>${x.g}</td>
-<td>${x.u}</td>
-<td>${x.r}</td>
-<td>${x.a}</td>
-<td>${x.b}</td>
-<td>
-<button onclick="duzenle(${i})">Düzenle</button>
-<button onclick="sil(${i})" style="background:red">Sil</button>
-</td>
-</tr>`
-})
-}
+    function deleteItem(i){
+      teamItems.splice(i,1);
+      if(editItemIndex === i) editItemIndex = -1;
+      renderAll();
+    }
 
-function ciz(){
+    function saveTeam(){
+      const team = {
+        name: document.getElementById("teamName").value.trim(),
+        addr: document.getElementById("teamAddr").value.trim(),
+        count: Number(document.getElementById("teamCount").value || 1),
+        items: JSON.parse(JSON.stringify(teamItems))
+      };
 
-let ctx=c.getContext("2d")
-ctx.clearRect(0,0,1000,600)
+      if(!team.name){
+        alert("Takım adı gir.");
+        return;
+      }
+      if(!team.addr){
+        alert("Adres / Çıkış gir.");
+        return;
+      }
+      if(team.count < 1){
+        alert("Takım sayısı 1 veya daha büyük olmalı.");
+        return;
+      }
+      if(team.items.length === 0){
+        alert("Takım içine en az bir ürün ekle.");
+        return;
+      }
 
-let gruplar={}
+      if(editTeamIndex >= 0){
+        teams[editTeamIndex] = team;
+        editTeamIndex = -1;
+      } else {
+        teams.push(team);
+      }
 
-data.forEach(x=>{
-let key=x.a
-if(!gruplar[key]) gruplar[key]=[]
-gruplar[key].push(x)
-})
+      document.getElementById("teamName").value = "";
+      document.getElementById("teamAddr").value = "";
+      document.getElementById("teamCount").value = 1;
+      teamItems = [];
+      renderAll();
+    }
 
-let xPos=100
+    function editTeam(i){
+      const team = teams[i];
+      document.getElementById("teamName").value = team.name;
+      document.getElementById("teamAddr").value = team.addr;
+      document.getElementById("teamCount").value = team.count;
+      teamItems = JSON.parse(JSON.stringify(team.items));
+      editTeamIndex = i;
+      renderAll();
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
 
-Object.keys(gruplar).forEach(k=>{
+    function deleteTeam(i){
+      teams.splice(i,1);
+      if(editTeamIndex === i) editTeamIndex = -1;
+      renderAll();
+    }
 
-let yPos=60
+    function clearAll(){
+      teamItems = [];
+      teams = [];
+      editItemIndex = -1;
+      editTeamIndex = -1;
+      document.getElementById("teamName").value = "";
+      document.getElementById("teamAddr").value = "";
+      document.getElementById("teamCount").value = 1;
+      renderAll();
+    }
 
-ctx.beginPath()
-ctx.moveTo(xPos,30)
-ctx.lineTo(xPos,550)
-ctx.stroke()
+    function loadDemo(){
+      teams = [
+        {
+          name:"ÇIKIŞ-1 Motor Takımı",
+          addr:"ÇIKIŞ-1",
+          count:3,
+          items:[
+            {group:"RCCB", product:"RCCB 4x40 30mA", mount:"DIN", qty:1, width:7.2},
+            {group:"MOTOR KORUMA", product:"MTK 6-10A", mount:"DIN", qty:1, width:3.5},
+            {group:"KONTAKTÖR", product:"Kontaktör 25A", mount:"TABAN", qty:1, width:5.5},
+            {group:"RK SİYAH", product:"RK Siyah 6mm", mount:"SERBEST", qty:3, width:0},
+            {group:"RK MAVİ", product:"RK Mavi 6mm", mount:"SERBEST", qty:1, width:0},
+            {group:"RK GND", product:"RK GND 6mm", mount:"SERBEST", qty:1, width:0}
+          ]
+        },
+        {
+          name:"ÇIKIŞ-2 Motor Takımı",
+          addr:"ÇIKIŞ-2",
+          count:2,
+          items:[
+            {group:"RCCB", product:"RCCB 4x63 30mA", mount:"DIN", qty:1, width:7.2},
+            {group:"MOTOR KORUMA", product:"MTK 9-14A", mount:"DIN", qty:1, width:3.5},
+            {group:"KONTAKTÖR", product:"Kontaktör 25A", mount:"TABAN", qty:1, width:5.5},
+            {group:"RK SİYAH", product:"RK Siyah 6mm", mount:"SERBEST", qty:3, width:0},
+            {group:"RK MAVİ", product:"RK Mavi 6mm", mount:"SERBEST", qty:1, width:0},
+            {group:"RK GND", product:"RK GND 6mm", mount:"SERBEST", qty:1, width:0}
+          ]
+        }
+      ];
+      teamItems = [];
+      renderAll();
+    }
 
-ctx.fillText(k,xPos-20,20)
+    function expandedItems(){
+      const all = [];
+      teams.forEach(team => {
+        team.items.forEach(item => {
+          all.push({
+            teamName: team.name,
+            addr: team.addr,
+            count: team.count,
+            group: item.group,
+            product: item.product,
+            mount: item.mount,
+            baseQty: item.qty,
+            totalQty: item.qty * team.count,
+            width: item.width,
+            totalWidth: item.width * item.qty * team.count
+          });
+        });
+      });
+      return all;
+    }
 
-gruplar[k].forEach((el,i)=>{
+    function renderItemsTable(){
+      const tbody = document.getElementById("itemsTable");
+      if(teamItems.length === 0){
+        tbody.innerHTML = `<tr><td colspan="7" class="empty">Takım içine henüz ürün eklenmedi.</td></tr>`;
+        return;
+      }
 
-let y=yPos+(i*80)
+      tbody.innerHTML = teamItems.map((x,i)=>`
+        <tr>
+          <td>${i+1}</td>
+          <td>${x.group}</td>
+          <td>${x.product}</td>
+          <td>${x.mount}</td>
+          <td>${x.qty}</td>
+          <td>${x.width}</td>
+          <td>
+            <button class="small" onclick="editItem(${i})">Düzenle</button>
+            <button class="small red" onclick="deleteItem(${i})">Sil</button>
+          </td>
+        </tr>
+      `).join("");
+    }
 
-ctx.beginPath()
-ctx.moveTo(xPos,y-20)
-ctx.lineTo(xPos,y)
-ctx.stroke()
+    function renderTeamsTable(){
+      const tbody = document.getElementById("teamsTable");
+      if(teams.length === 0){
+        tbody.innerHTML = `<tr><td colspan="6" class="empty">Henüz kaydedilmiş takım yok.</td></tr>`;
+        return;
+      }
 
-ctx.strokeRect(xPos-40,y,80,40)
-ctx.fillText(el.g,xPos-30,y+15)
-ctx.fillText(el.u,xPos-30,y+30)
+      tbody.innerHTML = teams.map((team,i)=>`
+        <tr>
+          <td>${i+1}</td>
+          <td>${team.name}</td>
+          <td>${team.addr}</td>
+          <td>${team.count}</td>
+          <td>${team.items.length} ürün</td>
+          <td>
+            <button class="small" onclick="editTeam(${i})">Düzenle</button>
+            <button class="small red" onclick="deleteTeam(${i})">Sil</button>
+          </td>
+        </tr>
+      `).join("");
+    }
 
-})
+    function renderSchema(){
+      const area = document.getElementById("schemaArea");
+      if(teams.length === 0){
+        area.innerHTML = `<div class="empty">Henüz takım yok.</div>`;
+        return;
+      }
 
-let kumanda=data.filter(x=>x.r=="KUMANDA" && x.b==k)
+      area.innerHTML = teams.map(team=>`
+        <div class="group-box">
+          <div class="group-title">${team.addr} — ${team.name}</div>
+          <div class="schema-line">
+            ${team.items.map((item,idx)=>`
+              <div class="schema-box">
+                <b>${item.group}</b><br>
+                ${item.product}<br>
+                Birim: ${item.qty}<br>
+                Takım: ${team.count}<br>
+                Toplam: ${item.qty * team.count}
+              </div>
+              ${idx < team.items.length - 1 ? '<div class="schema-arrow">→</div>' : ''}
+            `).join("")}
+          </div>
+          <div><b>Çarpan:</b> ${team.count} takım</div>
+        </div>
+      `).join("");
+    }
 
-kumanda.forEach((el,i)=>{
+    function renderSummaryAndBom(){
+      const all = expandedItems();
+      document.getElementById("sumTeams").textContent = teams.length;
+      document.getElementById("sumExpanded").textContent = all.reduce((s,x)=>s + x.totalQty, 0).toFixed(0);
+      document.getElementById("sumDin").textContent = all.filter(x=>x.mount==="DIN").reduce((s,x)=>s + x.totalWidth, 0).toFixed(1);
+      document.getElementById("sumTaban").textContent = all.filter(x=>x.mount==="TABAN").reduce((s,x)=>s + x.totalWidth, 0).toFixed(1);
 
-let kx=xPos+140
-let y=80+(i*80)
+      const bomArea = document.getElementById("bomArea");
+      if(all.length === 0){
+        bomArea.innerHTML = `<div class="empty">Henüz malzeme yok.</div>`;
+        return;
+      }
 
-ctx.beginPath()
-ctx.moveTo(xPos,y+20)
-ctx.lineTo(kx-40,y+20)
-ctx.stroke()
+      const bom = {};
+      all.forEach(x=>{
+        const key = `${x.group} | ${x.product}`;
+        bom[key] = (bom[key] || 0) + x.totalQty;
+      });
 
-ctx.strokeRect(kx-40,y,80,40)
-ctx.fillText(el.g,kx-30,y+15)
-ctx.fillText(el.u,kx-30,y+30)
+      let html = `<table><thead><tr><th>Ürün</th><th>Toplam Adet</th></tr></thead><tbody>`;
+      Object.keys(bom).forEach(k=>{
+        html += `<tr><td>${k}</td><td>${bom[k]}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+      bomArea.innerHTML = html;
+    }
 
-})
+    function renderCanvas(){
+      const canvas = document.getElementById("teamCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.font = "13px Arial";
+      ctx.lineWidth = 1.2;
 
-xPos+=300
+      if(teams.length === 0){
+        ctx.fillStyle = "#6b7280";
+        ctx.fillText("Henüz çizilecek takım yok.", 20, 30);
+        return;
+      }
 
-})
+      let x = 90;
+      const topBusY = 70;
 
-}
+      ctx.strokeStyle = "#d90429";
+      ctx.beginPath();
+      ctx.moveTo(40, topBusY);
+      ctx.lineTo(canvas.width - 40, topBusY);
+      ctx.stroke();
 
-</script>
+      teams.forEach(team=>{
+        ctx.fillStyle = "#1f2937";
+        ctx.fillText(team.addr, x - 20, 30);
+        ctx.fillText(team.name, x - 50, 48);
 
+        ctx.strokeStyle = "#d90429";
+        ctx.beginPath();
+        ctx.moveTo(x, topBusY);
+        ctx.lineTo(x, 110);
+        ctx.stroke();
+
+        let y = 120;
+        team.items.forEach((item, idx)=>{
+          ctx.strokeStyle = "#64748b";
+          ctx.strokeRect(x - 55, y, 110, 42);
+          ctx.fillStyle = "#111827";
+          ctx.fillText(item.group, x - 45, y + 15);
+          ctx.fillText(item.product, x - 45, y + 30);
+
+          ctx.fillStyle = "#2563eb";
+          ctx.fillText(`Birim:${item.qty}`, x - 45, y + 55);
+          ctx.fillText(`Takım:${team.count}`, x + 5, y + 55);
+
+          if(idx < team.items.length - 1){
+            ctx.strokeStyle = "#d90429";
+            ctx.beginPath();
+            ctx.moveTo(x, y + 42);
+            ctx.lineTo(x, y + 72);
+            ctx.stroke();
+          }
+
+          y += 80;
+        });
+
+        ctx.fillStyle = "#16a34a";
+        ctx.fillText(`${team.count} TAKIM`, x - 25, y + 10);
+
+        x += 250;
+      });
+    }
+
+    function renderAll(){
+      renderItemsTable();
+      renderTeamsTable();
+      renderSchema();
+      renderSummaryAndBom();
+      renderCanvas();
+    }
+
+    fillProducts();
+    renderAll();
+  </script>
 </body>
 </html>
